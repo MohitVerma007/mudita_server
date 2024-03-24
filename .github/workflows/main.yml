@@ -20,7 +20,7 @@ jobs:
 
     - name: Connect and pull
       run: |
-        ssh root@62.72.31.25 "cd /var/www/mudita_server && git checkout main && git pull"
+        ssh mudita_user@62.72.31.25 "cd /var/www/mudita_server && git checkout main && git pull"
 
     - name: Cleanup
       run: ssh-add -D

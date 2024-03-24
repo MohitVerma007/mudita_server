@@ -29,3 +29,5 @@ jobs:
           script: |
             cd /var/www/mudita_server
             ./.scripts/deploy.sh
+          options: "-v"
+

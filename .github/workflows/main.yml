@@ -20,7 +20,7 @@ jobs:
 
     - name: Connect and pull
       run: |
-        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull"
+        ssh root@62.72.31.25 "cd /var/www/mudita_server && git checkout main && git pull"
 
     - name: Cleanup
       run: ssh-add -D

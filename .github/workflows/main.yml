@@ -22,9 +22,9 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
+          host: 62.72.31.25
+          username: root
+          port: 22
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/mudita_server

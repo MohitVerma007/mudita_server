@@ -11,6 +11,7 @@ const pool = new Pool({
   port: process.env.DBPORT,
 });
 
+//not in use
 // const pool = new Pool({
 //   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
 // });

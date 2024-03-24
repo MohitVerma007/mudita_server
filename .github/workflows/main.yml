@@ -1,29 +1,29 @@
-name: Auto Deploy
+name: Deploy
 
+# Controls when the action will run. 
 on:
+  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches:
-      - main
+    branches: [ main ]
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  deploy:
-    name: Deploy to Server
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-          ref: main  # Specify the main branch explicitly
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}  # Your server's SSH host
-          username: ${{ secrets.USERNAME }}  # Your server's SSH username
-          port: ${{ secrets.PORT }}  # Your server's SSH port
-          key: ${{ secrets.SSH_PRIVATE_KEY }}  # Your SSH private key stored as a secret
-          script: |
-            cd /var/www/mudita_server
-            git pull origin main  # Pull the latest changes from the main branch
-            # Additional deployment steps if needed
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:       
+    - name: Deploy using ssh
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          cd /var/www/mudita_server/
+          git pull origin main
+          git status
+          npm install --only=prod

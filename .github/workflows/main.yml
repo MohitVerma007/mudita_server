@@ -1,9 +1,11 @@
+name: Run Pull
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-  
+
 jobs:
   run_pull:
     name: Run Pull
@@ -16,11 +18,11 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Add SSH host to known hosts
-      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      run: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
-    - name: Connect and pull
+    - name: Clone Repository and Pull
       run: |
-        ssh root@62.72.31.25 "cd /var/www/mudita_server && git checkout main && git pull"
-
-    - name: Cleanup
-      run: ssh-add -D
+        git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
+        cd /var/www/mudita_server
+        git checkout main
+        git pull

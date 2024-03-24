@@ -1,3 +1,11 @@
+name: Run Pull
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
 jobs:
   run_pull:
     name: Run Pull

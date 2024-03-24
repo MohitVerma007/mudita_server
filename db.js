@@ -11,13 +11,12 @@ const pool = new Pool({
   port: 5432,
 });
 
-<<<<<<< HEAD
-=======
+
 // const pool = new Pool({
 //   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
 // });
 
->>>>>>> f20a50877f938687103e08cd9f18728d810b5f74
+
 pool.connect((err) => {
   if (err) throw err;
   console.log("Connect to PostgreSQL successfully!");

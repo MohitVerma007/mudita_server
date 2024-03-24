@@ -1,0 +1,26 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  
+jobs:
+  run_pull:
+    name: Run Pull
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Add SSH host to known hosts
+      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Connect and pull
+      run: |
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull"
+
+    - name: Cleanup
+      run: ssh-add -D

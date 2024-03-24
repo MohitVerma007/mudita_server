@@ -1,25 +1,31 @@
 name: Deploy
 
-# Trigger the workflow on push and
-# pull request events on the master branch
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
-# Authenticate to the the server via ssh
-# and run our deployment script
 jobs:
   deploy:
+    name: Deploy to Server
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@main
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: main  # Specify the main branch explicitly
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: "cd /var/www/mudita_server && ./.scripts/deploy.sh"
+          script: |
+            cd /var/www/mudita_server
+            ./.scripts/deploy.sh

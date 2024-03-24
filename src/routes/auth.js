@@ -44,7 +44,7 @@ const storage = getStorage();
 // Setting up multer as a middleware to grab photo uploads
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
 // Mentor Middleware for handling file uploads

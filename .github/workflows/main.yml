@@ -20,8 +20,11 @@ jobs:
     - name: Add SSH host to known hosts
       run: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
-    - name: Clone Repository and Pull
+    - name: Clone Repository
+      run: sudo git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
+
+    - name: Change Directory and Pull Updates
       run: |
-       sudo git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
-       git checkout main
-       git pull
+        cd /var/www/mudita_server
+        sudo git checkout main
+        sudo git pull

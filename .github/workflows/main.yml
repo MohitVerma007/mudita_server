@@ -23,8 +23,8 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/mudita_server

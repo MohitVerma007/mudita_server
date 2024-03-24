@@ -22,7 +22,6 @@ jobs:
 
     - name: Clone Repository and Pull
       run: |
-        git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
-        cd /var/www/mudita_server
-        git checkout main
-        git pull
+       sudo git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
+       git checkout main
+       git pull

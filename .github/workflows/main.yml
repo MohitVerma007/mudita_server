@@ -1,10 +1,7 @@
-name: Deploy
+name: Auto Deploy
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -22,11 +19,11 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: 62.72.31.25
-          username: root
-          port: 22
-          key: |
-            b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAACFwAAAAdzc2gtcnNhAAAAAwEAAQAAAgEAwBL4zBD7EuP7B0smzAN5uQDXMyn6H6/tzbULtYdp+GZCOi/ZG3v69tj0h2LQa2+u3W/tMYg4LBlo8cIHiAZXVgQHc8YkmPhuB5/dbt2hPXyYvXKQnLQnQO9KACPPytjn/QlGTSuXaJRf7RmvSgETgaU6Q2e0Y8F4Wfs1PPL4deFNp1xkUhp+ajar8X/zP47aCdKyVq6MkW5k37l0SRZ91E2NFM5tuPcc/9VmebMHXpgSrihf+vKbAdJqK+zgY9BbZlpWoXcu2sXoWwKyGb3G227b5nFbSyL4ZaX4B8a77cvdyCa+3bT92pf5tCzcGOXSoR83tZg3gsyPt2JnvgAufxq2NhvGY75yCmIvkgjaVH37aGpFc+FNT+RKEATWUIMBqP7HYKSDsiKklMNnaM3ZggX3YXulF6eOmPlNqPo6mDJVobp+OE3Uu1LPIPZzrZRFMgUoxsmy65XIQIaYdBvB13dr9QHHnuC7ux5Gh6XaeAlxvOzjbiOCeqh40VcVc3GCZBo5f31k2C6fLi52CBiVFwh3qwXFMbqgDJQqOKU9XXGQ9SsV3DMIAcBUAK8cdeRXnWQPJHWzE35P22kZXC1c3enN2r7nUBghZE173ftkCzLKNRxzmRFqe21J7vAjzvc7K/RGZGP858cWICtExqRc/U0xdJlsvE18RwbomqV2rcEAAAdIA2DykANg8pAAAAAHc3NoLXJzYQAAAgEAwBL4zBD7EuP7B0smzAN5uQDXMyn6H6/tzbULtYdp+GZCOi/ZG3v69tj0h2LQa2+u3W/tMYg4LBlo8cIHiAZXVgQHc8YkmPhuB5/dbt2hPXyYvXKQnLQnQO9KACPPytjn/QlGTSuXaJRf7RmvSgETgaU6Q2e0Y8F4Wfs1PPL4deFNp1xkUhp+ajar8X/zP47aCdKyVq6MkW5k37l0SRZ91E2NFM5tuPcc/9VmebMHXpgSrihf+vKbAdJqK+zgY9BbZlpWoXcu2sXoWwKyGb3G227b5nFbSyL4ZaX4B8a77cvdyCa+3bT92pf5tCzcGOXSoR83tZg3gsyPt2JnvgAufxq2NhvGY75yCmIvkgjaVH37aGpFc+FNT+RKEATWUI...
+          host: ${{ secrets.SSH_HOST }}  # Your server's SSH host
+          username: ${{ secrets.USERNAME }}  # Your server's SSH username
+          port: ${{ secrets.PORT }}  # Your server's SSH port
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  # Your SSH private key stored as a secret
           script: |
             cd /var/www/mudita_server
-            ./.scripts/deploy.sh
+            git pull origin main  # Pull the latest changes from the main branch
+            # Additional deployment steps if needed

@@ -1,0 +1,21 @@
+name: Pull Latest Changes
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  pull_changes:
+    name: Pull Changes
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      
+    - name: Pull Latest Changes
+      run: |
+        cd ${{ github.workspace }}
+        git pull

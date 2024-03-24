@@ -1,28 +1,19 @@
-name: Run Pull
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
 jobs:
   run_pull:
     name: Run Pull
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Set up SSH key
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Add SSH host to known hosts
-      run: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+      - name: Add SSH host to known hosts
+        run: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
-    - name: Clone Repository and Pull
-      run: |
-        git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
-        cd /var/www/mudita_server
-        git checkout main
-        git pull
+      - name: Clone Repository and Pull
+        run: |
+          sudo git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
+          cd /var/www/mudita_server
+          sudo git checkout main
+          sudo git pull

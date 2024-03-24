@@ -21,7 +21,7 @@ jobs:
       run: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
     - name: Clone Repository
-      run: sudo git clone git@github.com:MohitVerma007/mudita_server.git /var/www/mudita_server
+      run: git clone https://github.com/MohitVerma007/mudita_server.git /var/www/mudita_server
 
     - name: Change Directory and Pull Updates
       run: |

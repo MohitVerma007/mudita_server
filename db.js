@@ -4,18 +4,12 @@ config();
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  user: process.env.USER,
+  user: process.env.DBUSER,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
-  port: process.env.DBPORT,
+  port: 5432,
 });
-
-// Postgres DB Setup test
-// const { Pool } = require("pg");
-// const pool = new Pool({
-//   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
-// });
 
 pool.connect((err) => {
   if (err) throw err;

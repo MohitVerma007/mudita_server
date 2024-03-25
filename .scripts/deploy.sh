@@ -1,10 +1,3 @@
 #!/bin/bash
-set -e
 
-echo "Deployment started ..."
-
-# Pull the latest version of the app
-git pull origin main
-echo "New changes copied to server !"
-
-echo "Deployment Finished!"
+ssh root@62.72.31.25 'cd /var/www/mudita_server/ && git pull origin main && npm install && pm2 restart your-app'

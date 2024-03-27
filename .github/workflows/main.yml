@@ -1,21 +1,22 @@
-name: Pull Latest Changes
+name: Deploy
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  pull_changes:
-    name: Pull Changes
+  deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-      
-    - name: Pull Latest Changes
-      run: |
-        cd ${{ github.workspace }}
-        git pull
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            ./deploy.sh

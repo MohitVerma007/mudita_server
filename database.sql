@@ -116,3 +116,11 @@ CREATE TABLE toolkit (
     technique_id INT[],
     FOREIGN KEY (technique_id) REFERENCES Technique(id) -- Assuming Technique is another table
 );
+CREATE TABLE Test (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    cover_img VARCHAR(255),
+    technique_id INT[],
+    FOREIGN KEY (technique_id) REFERENCES Technique(id) -- Assuming Technique is another table
+);

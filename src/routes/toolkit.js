@@ -1,11 +1,4 @@
 const { Router } = require("express");
-const {
-  createTechnique,
-  updateTechniqueById,
-  getTechniqueById,
-  getAllTechniques,
-  deleteTechniqueById,
-} = require("../controllers/technique");
 
 // Initialize Firebase
 
@@ -22,6 +15,13 @@ config();
 
 const multer = require("multer");
 const path = require("path");
+const {
+  createToolkit,
+  updateToolkitById,
+  getToolkitById,
+  getAllToolkits,
+  deleteToolkitById,
+} = require("../controllers/toolkit");
 
 // Initialize a firebase application
 initializeApp(firebaseConfig);
@@ -33,14 +33,11 @@ const storage = getStorage();
 // Setting up multer as a middleware to grab photo uploads
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 28 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
 // Middleware for handling file uploads
-const uploadMiddleware = upload.fields([
-  { name: "gif", maxCount: 1 },
-  { name: "music", maxCount: 1 },
-]);
+const uploadMiddleware = upload.fields([{ name: "cover_img", maxCount: 1 }]);
 
 const giveCurrentDateTime = () => {
   const today = new Date();
@@ -75,7 +72,7 @@ router.post("/create", uploadMiddleware, async (req, res) => {
               const dateTime = giveCurrentDateTime();
               const storageRef = ref(
                 storage,
-                `Technique/${file.originalname}_${dateTime}`
+                `Toolkit/${file.originalname}_${dateTime}`
               );
 
               // Create file metadata including the content type
@@ -121,7 +118,7 @@ router.post("/create", uploadMiddleware, async (req, res) => {
       return acc;
     }, {});
 
-    await createTechnique(req, res, formattedFileUrls);
+    await createToolkit(req, res, formattedFileUrls);
   } catch (error) {
     console.error("Error handling file uploads:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -150,7 +147,7 @@ router.put("/update/:id", uploadMiddleware, async (req, res) => {
               const dateTime = giveCurrentDateTime();
               const storageRef = ref(
                 storage,
-                `Technique/${file.originalname}_${dateTime}`
+                `Toolkit/${file.originalname}_${dateTime}`
               );
 
               // Create file metadata including the content type
@@ -196,14 +193,14 @@ router.put("/update/:id", uploadMiddleware, async (req, res) => {
       return acc;
     }, {});
 
-    await updateTechniqueById(req, res, formattedFileUrls);
+    await updateToolkitById(req, res, formattedFileUrls);
   } catch (error) {
     console.error("Error handling file uploads:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.get("/getbyId/:id", getTechniqueById);
-router.get("/getAll", getAllTechniques);
-router.delete("/delete/:id", deleteTechniqueById);
+router.get("/getbyId/:id", getToolkitById);
+router.get("/getAll", getAllToolkits);
+router.delete("/delete/:id", deleteToolkitById);
 
 module.exports = router;

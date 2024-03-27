@@ -94,7 +94,7 @@ CREATE TABLE Blog (
 CREATE TABLE Technique (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
-    cover_img VARCHAR(255),
+    file VARCHAR(255),
     description TEXT,
     music VARCHAR(255)
 );
@@ -106,4 +106,13 @@ CREATE TABLE Social_Media (
     description TEXT,
     cover_img VARCHAR(255),
     links VARCHAR(255)
+);
+
+CREATE TABLE toolkit (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    cover_img VARCHAR(255),
+    technique_id INT[],
+    FOREIGN KEY (technique_id) REFERENCES Technique(id) -- Assuming Technique is another table
 );

@@ -1,19 +1,23 @@
 const db = require("../../db.js");
 
 // Create a new technique
-exports.createTechnique = async (req, res, formattedFileUrls) => {
-  const { title, description } = req.body;
+exports.createToolkit = async (req, res, formattedFileUrls) => {
+  const { title, description, technique_id } = req.body;
 
   try {
     const query = `
-      INSERT INTO Technique (title, file, description, music)
+      INSERT INTO Toolkit (title, cover_img, description, technique_id)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const gif = formattedFileUrls.gif[0].downloadURL;
-    const music = formattedFileUrls.music[0].downloadURL;
+    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
 
-    const { rows } = await db.query(query, [title, gif, description, music]);
+    const { rows } = await db.query(query, [
+      title,
+      cover_img,
+      description,
+      technique_id,
+    ]);
 
     const createdTechnique = rows[0];
     return res.status(201).json({
@@ -29,16 +33,16 @@ exports.createTechnique = async (req, res, formattedFileUrls) => {
 };
 
 // Get all techniques with pagination
-exports.getAllTechniques = async (req, res) => {
+exports.getAllToolkits = async (req, res) => {
   const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 per page
   const offset = (page - 1) * limit;
 
   try {
-    const totalCountQuery = "SELECT COUNT(*) FROM Technique";
+    const totalCountQuery = "SELECT COUNT(*) FROM Toolkit";
     const totalCountResult = await db.query(totalCountQuery);
     const totalCount = parseInt(totalCountResult.rows[0].count);
 
-    const query = "SELECT * FROM Technique LIMIT $1 OFFSET $2";
+    const query = "SELECT * FROM Toolkit LIMIT $1 OFFSET $2";
     const { rows } = await db.query(query, [limit, offset]);
 
     const response = {
@@ -61,23 +65,23 @@ exports.getAllTechniques = async (req, res) => {
 };
 
 // Get a specific technique by ID
-exports.getTechniqueById = async (req, res) => {
-  const techniqueId = req.params.id;
+exports.getToolkitById = async (req, res) => {
+  const toolkitId = req.params.id;
 
   try {
-    const query = "SELECT * FROM Technique WHERE id = $1";
-    const { rows } = await db.query(query, [techniqueId]);
+    const query = "SELECT * FROM Toolkit WHERE id = $1";
+    const { rows } = await db.query(query, [toolkitId]);
 
     if (rows.length === 0) {
       return res.status(404).json({
-        error: "Technique not found",
+        error: "Toolkit not found",
       });
     }
 
-    const technique = rows[0];
+    const toolkit = rows[0];
     return res.status(200).json({
       success: true,
-      data: technique,
+      data: toolkit,
     });
   } catch (error) {
     console.error(error.message);
@@ -88,7 +92,7 @@ exports.getTechniqueById = async (req, res) => {
 };
 
 // Update a specific technique by ID
-exports.updateTechniqueById = async (req, res, formattedFileUrls) => {
+exports.updateToolkitById = async (req, res, formattedFileUrls) => {
   const techniqueId = req.params.id;
   const { title, description } = req.body;
 
@@ -130,24 +134,24 @@ exports.updateTechniqueById = async (req, res, formattedFileUrls) => {
 };
 
 // Delete a specific technique by ID
-exports.deleteTechniqueById = async (req, res) => {
-  const techniqueId = req.params.id;
+exports.deleteToolkitById = async (req, res) => {
+  const toolkitId = req.params.id;
 
   try {
-    const query = "DELETE FROM Technique WHERE id = $1 RETURNING *";
-    const { rows } = await db.query(query, [techniqueId]);
+    const query = "DELETE FROM Toolkit WHERE id = $1 RETURNING *";
+    const { rows } = await db.query(query, [toolkitId]);
 
     if (rows.length === 0) {
       return res.status(404).json({
-        error: "Technique not found",
+        error: "Toolkit not found",
       });
     }
 
-    const deletedTechnique = rows[0];
+    const deletedToolkit = rows[0];
     return res.status(200).json({
       success: true,
       is_deleted: "successfully Deleted !",
-      data: deletedTechnique,
+      data: deletedToolkit,
     });
   } catch (error) {
     console.error(error.message);

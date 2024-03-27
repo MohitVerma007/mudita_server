@@ -95,7 +95,7 @@ CREATE TABLE Technique (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     cover_img VARCHAR(255),
-    steps TEXT,
+    description TEXT,
     music VARCHAR(255)
 );
 

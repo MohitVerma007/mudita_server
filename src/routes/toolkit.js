@@ -21,6 +21,13 @@ const {
   getToolkitById,
   getAllToolkits,
   deleteToolkitById,
+  toolkitStep,
+  getPerformanceById,
+  getAllPerformance,
+  deletePerformanceById,
+  starttoolkitStep,
+  updatetoolkitStep,
+  finishtoolkitStep,
 } = require("../controllers/toolkit");
 
 // Initialize a firebase application
@@ -202,5 +209,14 @@ router.put("/update/:id", uploadMiddleware, async (req, res) => {
 router.get("/getbyId/:id", getToolkitById);
 router.get("/getAll", getAllToolkits);
 router.delete("/delete/:id", deleteToolkitById);
+
+// Next Step in Toolkit
+router.post("/startToolkit", starttoolkitStep);
+router.post("/nextToolkitstep", updatetoolkitStep);
+router.post("/finishToolkitstep", finishtoolkitStep);
+
+router.get("/scorebyId/:id", getPerformanceById);
+router.get("/getAllscore", getAllPerformance);
+router.delete("/deleteScore/:id", deletePerformanceById);
 
 module.exports = router;

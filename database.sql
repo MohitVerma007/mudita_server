@@ -116,11 +116,11 @@ CREATE TABLE toolkit (
     technique_id INT[],
     FOREIGN KEY (technique_id) REFERENCES Technique(id) -- Assuming Technique is another table
 );
-CREATE TABLE Test (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    cover_img VARCHAR(255),
-    technique_id INT[],
-    FOREIGN KEY (technique_id) REFERENCES Technique(id) -- Assuming Technique is another table
+
+CREATE TABLE Performance (
+    user_id INT REFERENCES Users(user_id),
+    curr_toolkit_id INT REFERENCES Toolkit(id),
+    completed_toolkit_ids INT[],
+    percentage_completed DECIMAL(5,2),
+    PRIMARY KEY (user_id, curr_toolkit_id)
 );

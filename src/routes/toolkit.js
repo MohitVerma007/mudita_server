@@ -28,6 +28,7 @@ const {
   starttoolkitStep,
   updatetoolkitStep,
   finishtoolkitStep,
+  skiptoolkitStep,
 } = require("../controllers/toolkit");
 
 // Initialize a firebase application
@@ -214,6 +215,7 @@ router.delete("/delete/:id", deleteToolkitById);
 router.post("/startToolkit", starttoolkitStep);
 router.post("/nextToolkitstep", updatetoolkitStep);
 router.post("/finishToolkitstep", finishtoolkitStep);
+router.post("/skipToolkitstep", skiptoolkitStep);
 
 router.get("/scorebyId/:id", getPerformanceById);
 router.get("/getAllscore", getAllPerformance);

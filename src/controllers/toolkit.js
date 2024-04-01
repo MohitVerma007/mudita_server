@@ -361,6 +361,62 @@ exports.finishtoolkitStep = async (req, res) => {
   }
 };
 
+// Skip Step Toolkit
+exports.skiptoolkitStep = async (req, res) => {
+  const { user_id, curr_toolkit_id } = req.body;
+
+  try {
+    // Validate input parameters
+    if (!user_id || !curr_toolkit_id) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing user_id or curr_toolkit_id in request body",
+      });
+    }
+
+    // Check if the performance entry already exists
+    const checkQuery = `
+      SELECT * FROM Performance
+      WHERE user_id = $1 AND curr_toolkit_id = $2;
+    `;
+    const { rowCount, rows } = await db.query(checkQuery, [
+      user_id,
+      curr_toolkit_id,
+    ]);
+
+    if (rowCount > 0) {
+      // Update the existing performance entry to mark the toolkit as finished
+      const updateQuery = `
+        UPDATE Performance
+        SET technique_id = NULL, percentage_completed = NULL, curr_toolkit_id = NULL
+        WHERE user_id = $1 AND curr_toolkit_id = $2
+        RETURNING *;
+      `;
+      const { rows: updatedRows } = await db.query(updateQuery, [
+        user_id,
+        curr_toolkit_id,
+      ]);
+
+      const updatedPerformanceEntry = updatedRows[0];
+      return res.status(200).json({
+        success: true,
+        message: "Journey Skipped Successfully",
+        data: updatedPerformanceEntry,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        error: "Performance entry not found",
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
 // Get All Performance
 exports.getAllPerformance = async (req, res) => {
   const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 per page

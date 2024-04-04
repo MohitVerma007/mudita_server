@@ -40,6 +40,7 @@ const upload = multer({
 const uploadMiddleware = upload.fields([
   { name: "gif", maxCount: 1 },
   { name: "music", maxCount: 1 },
+  { name: "cover_img", maxCount: 1 },
 ]);
 
 const giveCurrentDateTime = () => {

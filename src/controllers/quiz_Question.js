@@ -1,17 +1,19 @@
 const db = require("../../db.js");
 
 // Create a new question
-exports.createQuestion = async (req, res) => {
+exports.createQuestion = async (req, res, formattedFileUrls) => {
   const { quiz_id, question_text } = req.body;
 
   try {
     const query = `
-      INSERT INTO Questions (quiz_id, question_text)
-      VALUES ($1, $2)
+      INSERT INTO Questions (quiz_id, question_text, cover_img)
+      VALUES ($1, $2, $3)
       RETURNING *;
     `;
 
-    const { rows } = await db.query(query, [quiz_id, question_text]);
+    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
+
+    const { rows } = await db.query(query, [quiz_id, question_text, cover_img]);
 
     const createdQuestion = rows[0];
     return res.status(201).json({
@@ -46,19 +48,25 @@ exports.getAllQuestionsForQuiz = async (req, res) => {
 };
 
 // Update question by ID
-exports.updateQuestionById = async (req, res) => {
+exports.updateQuestionById = async (req, res, formattedFileUrls) => {
   const questionId = req.params.id;
   const { questionText } = req.body;
 
   try {
     const query = `
       UPDATE Questions
-      SET question_text = $1
-      WHERE question_id = $2
+      SET question_text = $1, cover_img = $2
+      WHERE question_id = $3
       RETURNING *;
     `;
 
-    const { rows } = await db.query(query, [questionText, questionId]);
+    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
+
+    const { rows } = await db.query(query, [
+      questionText,
+      cover_img,
+      questionId,
+    ]);
 
     if (rows.length === 0) {
       return res.status(404).json({

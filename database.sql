@@ -48,7 +48,9 @@ CREATE TABLE Quizzes (
 CREATE TABLE Questions (
     question_id SERIAL PRIMARY KEY,
     quiz_id INT REFERENCES Quizzes(quiz_id),
-    question_text TEXT NOT NULL
+    question_text TEXT NOT NULL,
+    cover_img VARCHAR(255)
+
 );
 
 
@@ -96,7 +98,9 @@ CREATE TABLE Technique (
     title VARCHAR(255) NOT NULL,
     file VARCHAR(255),
     description TEXT,
-    music VARCHAR(255)
+    music VARCHAR(255),
+    cover_img VARCHAR(255)
+
 );
 
 

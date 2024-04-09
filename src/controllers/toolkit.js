@@ -268,14 +268,15 @@ exports.updatetoolkitStep = async (req, res) => {
 
         const updateQuery = `
           UPDATE Performance
-          SET technique_id = $1, percentage_completed = $2, curr_toolkit_id = $3
-          WHERE user_id = $4 AND curr_toolkit_id = $5
+          SET technique_id = $1, percentage_completed = $2, curr_toolkit_id = $3, completed_technique_ids = array_append(completed_technique_ids, $4)
+          WHERE user_id = $5 AND curr_toolkit_id = $6
           RETURNING *;
         `;
         const { rows: updatedRows } = await db.query(updateQuery, [
           technique_id,
           percentageCompleted,
           newCurrToolkitId,
+          oldTechniqueId,
           user_id,
           curr_toolkit_id,
         ]);
@@ -332,7 +333,7 @@ exports.finishtoolkitStep = async (req, res) => {
       // Update the existing performance entry to mark the toolkit as finished
       const updateQuery = `
         UPDATE Performance
-        SET technique_id = NULL, percentage_completed = 100.00, curr_toolkit_id = NULL, completed_toolkit_ids = array_append(completed_toolkit_ids, $1)
+        SET technique_id = NULL, completed_technique_ids = NULL, percentage_completed = 100.00, curr_toolkit_id = NULL, completed_toolkit_ids = array_append(completed_toolkit_ids, $1)
         WHERE user_id = $2 AND curr_toolkit_id = $3
         RETURNING *;
       `;

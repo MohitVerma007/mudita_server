@@ -5,6 +5,11 @@ const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const cors = require("cors");
 
+// import scheduled notification sender
+const startScheduledTask = require("./notification/scheduledTasks");
+
+startScheduledTask();
+
 //import passport middleware
 require("./middlewares/passport-middleware");
 

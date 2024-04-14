@@ -17,7 +17,7 @@ exports.getMenteeById = async (req, res) => {
 
   try {
     const query = `
-      SELECT users.user_id, users.name, users.email, users.mobile, users.profile_img, mentees.dob, mentees.occupation
+      SELECT users.user_id, users.name, users.email, users.mobile, users.profile_img, mentees.dob, mentees.fcm_token ,mentees.occupation
       FROM users
       INNER JOIN mentees ON users.user_id = mentees.user_id
       WHERE users.user_id = $1;
@@ -166,7 +166,16 @@ exports.getAllMentors = async (req, res) => {
 // Register Mentees
 
 exports.registerMentee = async (req, res) => {
-  const { name, email, password, gender, dob, address, mobile } = req.body;
+  const {
+    name,
+    email,
+    password,
+    gender,
+    dob,
+    address,
+    mobile,
+    token,
+  } = req.body;
   const { occupation } = req.body; // Additional mentee-specific field
 
   try {
@@ -198,11 +207,11 @@ exports.registerMentee = async (req, res) => {
 
     // Step 2: Insert data into the 'mentees' table
     const menteeInsertQuery = `
-      INSERT INTO mentees(user_id, dob, occupation)
-      VALUES ($1, $2, $3);
+      INSERT INTO mentees(user_id, dob, occupation, fcm_token)
+      VALUES ($1, $2, $3, $4);
     `;
 
-    const menteeInsertValues = [userId, dob, occupation];
+    const menteeInsertValues = [userId, dob, occupation, token];
 
     await db.query(menteeInsertQuery, menteeInsertValues);
 

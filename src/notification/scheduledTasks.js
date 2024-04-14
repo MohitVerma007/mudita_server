@@ -13,9 +13,6 @@ function startScheduledTask() {
   // Schedule task to run every minute
   cron.schedule("* * * * *", async () => {
     try {
-      // Connect to the database
-      const client = await db.connect();
-
       // Get current time
       const currentTime = new Date().toLocaleTimeString("en-US", {
         hour12: false,
@@ -27,11 +24,12 @@ function startScheduledTask() {
         FROM ToolkitReminders
         WHERE reminder_time = $1
       `;
-      const { rows } = await client.query(queryText, [currentTime]);
+      const { rows } = await db.query(queryText, [currentTime]);
 
       // Iterate through reminders and send notifications
       for (const row of rows) {
         const { user_id, reminder_message } = row;
+        console.log("Alert Sending ....");
 
         // Retrieve FCM token for the mentee
         const fcmTokensQuery = `
@@ -39,7 +37,7 @@ function startScheduledTask() {
           FROM mentees
           WHERE user_id = $1
         `;
-        const fcmTokensResult = await client.query(fcmTokensQuery, [user_id]);
+        const fcmTokensResult = await db.query(fcmTokensQuery, [user_id]);
         const fcmToken = fcmTokensResult.rows[0].fcm_token;
 
         // Send notification to the mentee
@@ -52,9 +50,6 @@ function startScheduledTask() {
         };
         await admin.messaging().send(message);
       }
-
-      // Release the database client
-      db.release(client);
     } catch (error) {
       console.error("Error sending notifications:", error);
     }

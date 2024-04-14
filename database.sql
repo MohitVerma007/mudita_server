@@ -100,6 +100,7 @@ CREATE TABLE Technique (
     file VARCHAR(255),
     description TEXT,
     music VARCHAR(255),
+    type VARCHAR(10) CHECK (type IN ('music', 'without music'));
     cover_img VARCHAR(255)
 
 );
@@ -123,11 +124,26 @@ CREATE TABLE toolkit (
 );
 
 CREATE TABLE Performance (
+    performance_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(user_id),
     curr_toolkit_id INT REFERENCES Toolkit(id),
-    completed_toolkit_ids INT[],
     completed_technique_ids INT[],
     percentage_completed DECIMAL(5,2),
-    technique_id INT,
-    PRIMARY KEY (user_id, curr_toolkit_id)
+    technique_id INT
+);
+
+
+CREATE TABLE ToolkitReminders (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES Users(user_id),
+    reminder_message TEXT,
+    reminder_time TIME
+);
+
+
+CREATE TABLE insta (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    img VARCHAR(255),
+    video TEXT
 );

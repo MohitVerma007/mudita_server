@@ -26,11 +26,13 @@ const questionRoutes = require("./routes/quiz_Question");
 const answerRoutes = require("./routes/quiz_Answer");
 const sosRoutes = require("./routes/sos");
 const blogRoutes = require("./routes/blog");
+const instaRoutes = require("./routes/insta");
 const bannerRoutes = require("./routes/banner");
 const socialRoutes = require("./routes/social_media");
 const techniqueRoutes = require("./routes/technique");
 const toolkitRoutes = require("./routes/toolkit");
 const faqRoutes = require("./routes/faq");
+const schedule_alert = require("./routes/schedule_alerts");
 
 //initialize routes
 app.use("/api/v1", authRoutes);
@@ -38,12 +40,14 @@ app.use("/api/v1/quiz", quizRoutes);
 app.use("/api/v1/question", questionRoutes);
 app.use("/api/v1/answer", answerRoutes);
 app.use("/api/v1/blog", blogRoutes);
+app.use("/api/v1/insta", instaRoutes);
 app.use("/api/v1/banner", bannerRoutes);
 app.use("/api/v1/sos", sosRoutes);
 app.use("/api/v1/social", socialRoutes);
 app.use("/api/v1/technique", techniqueRoutes);
 app.use("/api/v1/toolkit", toolkitRoutes);
 app.use("/api/v1/faq", faqRoutes);
+app.use("/api/v1/alert", schedule_alert);
 
 //app start
 const appStart = () => {

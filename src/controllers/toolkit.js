@@ -168,53 +168,24 @@ exports.starttoolkitStep = async (req, res) => {
   const { user_id, curr_toolkit_id, technique_id } = req.body;
 
   try {
-    // Check if the performance entry already exists for the user
-    const checkQuery = `
-      SELECT * FROM Performance
-      WHERE user_id = $1;
-    `;
-    const { rowCount, rows } = await db.query(checkQuery, [user_id]);
-
-    if (rowCount > 0) {
-      // Update the existing performance entry
-      const existingPerformanceEntry = rows[0];
-      const updateQuery = `
-        UPDATE Performance
-        SET percentage_completed = 0.00, curr_toolkit_id = $1, technique_id = $2
-        WHERE user_id = $3
-        RETURNING *;
-      `;
-      const { rows: updatedRows } = await db.query(updateQuery, [
-        curr_toolkit_id,
-        technique_id,
-        user_id,
-      ]);
-      const updatedPerformanceEntry = updatedRows[0];
-
-      return res.status(200).json({
-        success: true,
-        data: updatedPerformanceEntry,
-      });
-    } else {
-      // Create a new performance entry
-      const insertQuery = `
+    // Create a new performance entry
+    const insertQuery = `
         INSERT INTO Performance (user_id, curr_toolkit_id, technique_id, percentage_completed)
         VALUES ($1, $2, $3, $4)
         RETURNING *;
       `;
-      const { rows: createdRows } = await db.query(insertQuery, [
-        user_id,
-        curr_toolkit_id,
-        technique_id,
-        0.0,
-      ]);
-      const createdPerformanceEntry = createdRows[0];
+    const { rows: createdRows } = await db.query(insertQuery, [
+      user_id,
+      curr_toolkit_id,
+      technique_id,
+      0.0,
+    ]);
+    const createdPerformanceEntry = createdRows[0];
 
-      return res.status(201).json({
-        success: true,
-        data: createdPerformanceEntry,
-      });
-    }
+    return res.status(201).json({
+      success: true,
+      data: createdPerformanceEntry,
+    });
   } catch (error) {
     console.error(error.message);
     return res.status(500).json({
@@ -333,12 +304,11 @@ exports.finishtoolkitStep = async (req, res) => {
       // Update the existing performance entry to mark the toolkit as finished
       const updateQuery = `
         UPDATE Performance
-        SET technique_id = NULL, completed_technique_ids = NULL, percentage_completed = 100.00, curr_toolkit_id = NULL, completed_toolkit_ids = array_append(completed_toolkit_ids, $1)
-        WHERE user_id = $2 AND curr_toolkit_id = $3
+        SET technique_id = NULL, percentage_completed = 100.00, curr_toolkit_id = NULL
+        WHERE user_id = $1 AND curr_toolkit_id = $2
         RETURNING *;
       `;
       const { rows: updatedRows } = await db.query(updateQuery, [
-        curr_toolkit_id,
         user_id,
         curr_toolkit_id,
       ]);
@@ -464,7 +434,7 @@ exports.getPerformanceById = async (req, res) => {
       });
     }
 
-    const Record = rows[0];
+    const Record = rows;
     return res.status(200).json({
       success: true,
       data: Record,

@@ -2,16 +2,16 @@ const db = require("../../db.js");
 
 // Create a new technique
 exports.createTechnique = async (req, res, formattedFileUrls) => {
-  const { title, description } = req.body;
+  const { title, description, type } = req.body;
 
   try {
     const query = `
-      INSERT INTO Technique (title, file, description, music, cover_img)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO Technique (title, file, description, music, cover_img, type)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *;
     `;
     const gif = formattedFileUrls.gif[0].downloadURL;
-    const music = formattedFileUrls.music[0].downloadURL;
+    const music = formattedFileUrls.music?.[0]?.downloadURL ?? null;
     const cover_img = formattedFileUrls.cover_img[0].downloadURL;
 
     const { rows } = await db.query(query, [
@@ -20,6 +20,7 @@ exports.createTechnique = async (req, res, formattedFileUrls) => {
       description,
       music,
       cover_img,
+      type,
     ]);
 
     const createdTechnique = rows[0];
@@ -97,17 +98,17 @@ exports.getTechniqueById = async (req, res) => {
 // Update a specific technique by ID
 exports.updateTechniqueById = async (req, res, formattedFileUrls) => {
   const techniqueId = req.params.id;
-  const { title, description } = req.body;
+  const { title, description, type } = req.body;
 
   try {
     const query = `
       UPDATE Technique
-      SET title = $1, file = $2, description = $3, music = $4, cover_img = $5
-      WHERE id = $6
+      SET title = $1, file = $2, description = $3, music = $4, cover_img = $5, type = $6
+      WHERE id = $7
       RETURNING *;
     `;
     const gif = formattedFileUrls.gif[0].downloadURL;
-    const music = formattedFileUrls.music[0].downloadURL;
+    const music = formattedFileUrls.music?.[0]?.downloadURL ?? null;
     const cover_img = formattedFileUrls.cover_img[0].downloadURL;
 
     const { rows } = await db.query(query, [
@@ -116,6 +117,7 @@ exports.updateTechniqueById = async (req, res, formattedFileUrls) => {
       description,
       music,
       cover_img,
+      type,
       techniqueId,
     ]);
 

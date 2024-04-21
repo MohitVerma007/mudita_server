@@ -147,3 +147,11 @@ CREATE TABLE insta (
     img VARCHAR(255),
     video TEXT
 );
+
+CREATE TABLE journal (
+    id SERIAL PRIMARY KEY,
+    current_score INT,
+    month INT,
+    previous_scores JSONB,
+    user_id INT REFERENCES users(user_id)
+);

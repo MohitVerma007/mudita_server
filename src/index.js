@@ -34,6 +34,7 @@ const toolkitRoutes = require("./routes/toolkit");
 const faqRoutes = require("./routes/faq");
 const journalRoutes = require("./routes/journal");
 const schedule_alert = require("./routes/schedule_alerts");
+const mail = require("./routes/mail");
 
 //initialize routes
 app.use("/api/v1", authRoutes);
@@ -50,6 +51,7 @@ app.use("/api/v1/toolkit", toolkitRoutes);
 app.use("/api/v1/faq", faqRoutes);
 app.use("/api/v1/journal", journalRoutes);
 app.use("/api/v1/alert", schedule_alert);
+app.use("/api/v1/email", mail);
 
 //app start
 const appStart = () => {

@@ -35,6 +35,7 @@ const faqRoutes = require("./routes/faq");
 const journalRoutes = require("./routes/journal");
 const schedule_alert = require("./routes/schedule_alerts");
 const mail = require("./routes/mail");
+const { chatbot } = require("./chatbot/chatbot");
 
 //initialize routes
 app.use("/api/v1", authRoutes);
@@ -52,6 +53,9 @@ app.use("/api/v1/faq", faqRoutes);
 app.use("/api/v1/journal", journalRoutes);
 app.use("/api/v1/alert", schedule_alert);
 app.use("/api/v1/email", mail);
+
+// Chatbot
+app.post("/api/v1/chatbot", chatbot);
 
 //app start
 const appStart = () => {

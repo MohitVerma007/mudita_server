@@ -1,15 +1,15 @@
 const db = require("../../db.js");
 
 exports.createFAQ = async (req, res) => {
-  const { question, answer } = req.body;
+  const { question, answer, user_id } = req.body;
 
   try {
     const query = `
-        INSERT INTO faq (question, answer)
-        VALUES ($1, $2)
+        INSERT INTO faq (question, answer, user_id)
+        VALUES ($1, $2, $3)
         RETURNING *;
       `;
-    const { rows } = await db.query(query, [question, answer]);
+    const { rows } = await db.query(query, [question, answer, user_id]);
 
     const createdFAQ = rows[0];
     return res.status(201).json({
@@ -56,11 +56,11 @@ exports.getAllFAQ = async (req, res) => {
 };
 
 exports.getFAQById = async (req, res) => {
-  const faqId = req.params.id;
+  const userId = req.params.id;
 
   try {
-    const query = "SELECT * FROM faq WHERE faq_id = $1";
-    const { rows } = await db.query(query, [faqId]);
+    const query = "SELECT * FROM faq WHERE user_id = $1";
+    const { rows } = await db.query(query, [userId]);
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -68,7 +68,7 @@ exports.getFAQById = async (req, res) => {
       });
     }
 
-    const faq = rows[0];
+    const faq = rows;
     return res.status(200).json({
       success: true,
       data: faq,

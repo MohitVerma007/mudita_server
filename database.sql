@@ -155,3 +155,11 @@ CREATE TABLE journal (
     previous_scores JSONB,
     user_id INT REFERENCES users(user_id)
 );
+
+
+CREATE TABLE faq (
+    faq_id SERIAL PRIMARY KEY,
+    question TEXT,
+    answer TEXT,
+    user_id INT REFERENCES users(user_id)
+);

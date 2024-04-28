@@ -1,0 +1,64 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "Hi",
+        "Hey",
+        "Hello",
+        "Good day",
+        "Greetings"
+      ],
+      "responses": [
+        "Hello! How can I assist you today?",
+        "Hi there! How can I help?",
+        "Hey! What brings you here?"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "Steps to recover"      
+      ],
+      "responses": [
+        "Sleep Well, Reduce Stress, Reduce Anxiety, Reduce Depression"
+      ]
+    },
+    {
+      "tag": "Sleep",
+      "patterns": [
+        "Sleep Well" 
+      ],
+      "responses": [
+        "Maintain a regular sleep schedule: Try to go to bed and wake up at the same time every day, even on weekends. This can help regulate your body's internal clock."
+      ]
+    },
+ {
+      "tag": "Stress",
+      "patterns": [
+        "Reduce Stress"
+      ],
+      "responses": [
+        "Mindfulness and meditation: These practices can help you stay present and reduce negative thinking patterns. They can also help you develop a greater awareness of your emotions and how they affect you."
+      ]
+    },
+ {
+      "tag": "Anxiety",
+      "patterns": [
+        "Reduce Anxiety" 
+      ],
+      "responses": [
+        "Deep breathing exercises: Practice deep, slow breathing to activate the body's relaxation response and reduce feelings of anxiety."
+      ]
+    },
+    {
+      "tag": "Depression",
+      "patterns": [
+        "Reduce Depression"
+      ],
+      "responses": [
+        "Mindfulness and meditation: Practices like mindfulness meditation can help you stay grounded in the present moment, reduce rumination, and improve overall mood."
+      ]
+    }
+  ]
+}

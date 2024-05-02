@@ -31,6 +31,7 @@ CREATE TABLE mentees (
     user_id INT UNIQUE,
     dob DATE,
     occupation VARCHAR(255),
+    current_score INT,
     fcm_token VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );

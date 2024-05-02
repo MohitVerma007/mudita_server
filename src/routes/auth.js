@@ -12,6 +12,7 @@ const {
   updateMentorProfile,
   updateMenteeProfile,
   approveMentorProfile,
+  deleteAllMentee,
 } = require("../controllers/auth");
 const {
   validationMiddleware,
@@ -238,6 +239,7 @@ router.get("/getMentees/:user_id", getMenteeById);
 router.get("/protected", userAuth, protected);
 router.post("/login", loginValidation, validationMiddleware, login);
 router.get("/logout", logout);
+router.delete("/deleteAllMentee", deleteAllMentee);
 
 // Register Mentee
 router.post(

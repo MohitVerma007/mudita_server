@@ -8,7 +8,8 @@ const cors = require("cors");
 // import scheduled notification sender
 const startScheduledTask = require("./notification/scheduledTasks");
 
-startScheduledTask();
+startScheduledTask.startScheduledTask();
+startScheduledTask.sendAlertAtTenPM();
 
 //import passport middleware
 require("./middlewares/passport-middleware");

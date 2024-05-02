@@ -58,4 +58,45 @@ function startScheduledTask() {
   // No need to start cron - it handles scheduling internally
 }
 
-module.exports = startScheduledTask;
+function sendAlertAtTenPM() {
+  cron.schedule("07 11 * * *", async () => {
+    try {
+      // Get all mentees with non-empty FCM tokens
+      const allMenteesQuery = `
+        SELECT user_id, fcm_token
+        FROM mentees
+        WHERE fcm_token IS NOT NULL AND fcm_token != ''
+      `;
+      const { rows } = await db.query(allMenteesQuery);
+
+      // Iterate through mentees and send notifications
+      for (const row of rows) {
+        const { user_id, fcm_token } = row;
+
+        console.log("Alert Sending ....");
+
+        // Send notification to the mentee only if FCM token is not empty
+        if (fcm_token) {
+          console.log(user_id);
+          const message = {
+            notification: {
+              title: "Toolkit Reminder",
+              body: "Your reminder message goes here.", // Customize your message here
+            },
+            token: fcm_token,
+          };
+          await admin.messaging().send(message);
+        }
+      }
+    } catch (error) {
+      console.error("Error sending notifications:", error);
+    }
+  });
+
+  // No need to start cron - it handles scheduling internally
+}
+
+module.exports = {
+  startScheduledTask,
+  sendAlertAtTenPM,
+};

@@ -17,7 +17,7 @@ exports.getMenteeById = async (req, res) => {
 
   try {
     const query = `
-      SELECT users.user_id, users.name, users.email, users.mobile, users.profile_img, mentees.dob, mentees.fcm_token ,mentees.occupation
+      SELECT users.user_id, users.name, users.email, users.mobile, users.profile_img, mentees.dob, mentees.fcm_token ,mentees.occupation, users.address, mentees.fcm_token, mentees.current_score
       FROM users
       INNER JOIN mentees ON users.user_id = mentees.user_id
       WHERE users.user_id = $1;
@@ -96,7 +96,7 @@ exports.getAllMentees = async (req, res) => {
 
     // Query to fetch paginated mentees
     const query = `
-      SELECT users.user_id, users.name, users.email, users.mobile, users.profile_img, mentees.dob, mentees.occupation
+      SELECT users.user_id, users.name, users.email, users.mobile, users.profile_img, mentees.dob, mentees.occupation, users.address, mentees.fcm_token, mentees.current_score
       FROM users
       INNER JOIN mentees ON users.user_id = mentees.user_id
       WHERE users.role = 'mentee'
@@ -458,7 +458,7 @@ async function deleteFileFromStorage(fileUrl) {
 // Update Mentee Profile
 exports.updateMenteeProfile = async (req, res, formattedFileUrls) => {
   const { user_id } = req.params; // Assuming user_id is available in the request
-  const { name, gender, dob, address, mobile, occupation } = req.body;
+  const { name, gender, dob, address, mobile, occupation, token } = req.body;
 
   try {
     const userInfoQuery = `
@@ -470,7 +470,7 @@ exports.updateMenteeProfile = async (req, res, formattedFileUrls) => {
     const userInfo = userInfoResult.rows[0];
 
     const menteeInfoQuery = `
-    SELECT  dob, occupation
+    SELECT  dob, occupation, fcm_token
     FROM mentees
     WHERE user_id = $1;
   `;
@@ -483,7 +483,9 @@ exports.updateMenteeProfile = async (req, res, formattedFileUrls) => {
     const mymobile = mobile || userInfo.mobile;
     const mydob = dob || menteeInfo.dob;
     const myoccupation = occupation || menteeInfo.occupation;
-
+    // const mytoken = token || menteeInfo.fcm_token;
+    const mytoken = null;
+    // console.log(menteeInfo);
     const profile_img =
       formattedFileUrls.profile_img?.[0]?.downloadURL || userInfo.profile_img;
     if (formattedFileUrls.profile_img && userInfo.profile_img) {
@@ -510,10 +512,10 @@ exports.updateMenteeProfile = async (req, res, formattedFileUrls) => {
     // Update the mentee-specific information
     const updateMenteeQuery = `
       UPDATE mentees
-      SET occupation = $1 , dob = $2
-      WHERE user_id = $3;
+      SET occupation = $1 , dob = $2, fcm_token = $3
+      WHERE user_id = $4;
     `;
-    const updateMenteeValues = [myoccupation, mydob, user_id];
+    const updateMenteeValues = [myoccupation, mydob, mytoken, user_id];
     await db.query(updateMenteeQuery, updateMenteeValues);
 
     if (!updatedUser) {
@@ -861,5 +863,17 @@ exports.approveMentorProfile = async (req, res) => {
     return res.status(500).json({
       error: error.message,
     });
+  }
+};
+
+exports.deleteAllMentee = async function deleteAllMentees(req, res) {
+  try {
+    // Update mentees table to set fcm_token to null for all rows
+    await db.query("UPDATE mentees SET fcm_token = NULL");
+
+    res.status(200).json({ message: "All FCM tokens have been nullified." });
+  } catch (error) {
+    console.error("Error nullifying FCM tokens:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -26,6 +26,11 @@ const socialRoutes = require("./src/routes/social_media");
 const techniqueRoutes = require("./src/routes/technique");
 const toolkitRoutes = require("./src/routes/toolkit");
 const faqRoutes = require("./src/routes/faq");
+const journalRoutes = require("./src/routes/journal");
+const schedule_alert = require("./src/routes/schedule_alerts");
+const mail = require("./src/routes/mail");
+const { chatbot } = require("./chatbot/chatbot");
+const noteRoutes = require("./src/routes/notes");
 
 //initialize routes
 app.use("/api/v1", authRoutes);
@@ -39,6 +44,13 @@ app.use("/api/v1/social", socialRoutes);
 app.use("/api/v1/technique", techniqueRoutes);
 app.use("/api/v1/toolkit", toolkitRoutes);
 app.use("/api/v1/faq", faqRoutes);
+app.use("/api/v1/journal", journalRoutes);
+app.use("/api/v1/alert", schedule_alert);
+app.use("/api/v1/email", mail);
+app.use("/api/v1/note", noteRoutes);
+
+// Chatbot
+app.post("/api/v1/chatbot", chatbot);
 
 //app start
 const appStart = () => {

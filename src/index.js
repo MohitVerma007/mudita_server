@@ -23,6 +23,7 @@ app.use(passport.initialize());
 //import routes
 const authRoutes = require("./routes/auth");
 const quizRoutes = require("./routes/quiz");
+const sessionRoutes = require("./routes/session");
 const questionRoutes = require("./routes/quiz_Question");
 const answerRoutes = require("./routes/quiz_Answer");
 const sosRoutes = require("./routes/sos");
@@ -37,10 +38,12 @@ const journalRoutes = require("./routes/journal");
 const schedule_alert = require("./routes/schedule_alerts");
 const mail = require("./routes/mail");
 const { chatbot } = require("./chatbot/chatbot");
+const noteRoutes = require("./routes/notes");
 
 //initialize routes
 app.use("/api/v1", authRoutes);
 app.use("/api/v1/quiz", quizRoutes);
+app.use("/api/v1/session", sessionRoutes);
 app.use("/api/v1/question", questionRoutes);
 app.use("/api/v1/answer", answerRoutes);
 app.use("/api/v1/blog", blogRoutes);
@@ -54,6 +57,7 @@ app.use("/api/v1/faq", faqRoutes);
 app.use("/api/v1/journal", journalRoutes);
 app.use("/api/v1/alert", schedule_alert);
 app.use("/api/v1/email", mail);
+app.use("/api/v1/note", noteRoutes);
 
 // Chatbot
 app.post("/api/v1/chatbot", chatbot);

@@ -164,3 +164,22 @@ CREATE TABLE faq (
     answer TEXT,
     user_id INT REFERENCES users(user_id)
 );
+
+CREATE TABLE notes (
+    note_id SERIAL PRIMARY KEY,
+    title TEXT,
+    description TEXT,
+    user_id INT REFERENCES users(user_id)
+);
+
+CREATE TABLE session (
+    session_id SERIAL PRIMARY KEY,
+    mentee_id INT NOT NULL REFERENCES users(user_id),
+    mentor_id INT NOT NULL REFERENCES users(user_id),
+    status VARCHAR(10) CHECK (status IN ('pending', 'rejected', 'approved')) NOT NULL DEFAULT 'pending',
+    meet_link VARCHAR(255),
+    mentee_text TEXT,
+    mentor_text TEXT,
+    is_completed BOOLEAN DEFAULT FALSE,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

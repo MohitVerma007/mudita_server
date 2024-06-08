@@ -93,37 +93,59 @@ exports.getToolkitById = async (req, res) => {
 
 // Update a specific Toolkit by ID
 exports.updateToolkitById = async (req, res, formattedFileUrls) => {
-  const techniqueId = req.params.id;
-  const { title, description } = req.body;
+  const toolkitId = req.params.id;
+  const { title, description, technique_id } = req.body;
 
   try {
-    const query = `
-      UPDATE Technique
-      SET title = $1, file = $2, description = $3, music = $4
-      WHERE id = $5
-      RETURNING *;
+    // Fetch the existing values
+    const existingQuery = `
+      SELECT title, cover_img, description, technique_id 
+      FROM Toolkit
+      WHERE id = $1
     `;
-    const gif = formattedFileUrls.gif[0].downloadURL;
-    const music = formattedFileUrls.music[0].downloadURL;
+    const existingResult = await db.query(existingQuery, [toolkitId]);
 
-    const { rows } = await db.query(query, [
-      title,
-      gif,
-      description,
-      music,
-      techniqueId,
-    ]);
-
-    if (rows.length === 0) {
+    if (existingResult.rows.length === 0) {
       return res.status(404).json({
-        error: "Technique not found",
+        error: "Toolkit not found",
       });
     }
 
-    const updatedTechnique = rows[0];
+    const existingToolkit = existingResult.rows[0];
+
+    // Determine the new cover_img URL, if available
+    const cover_img = formattedFileUrls?.cover_img?.[0]?.downloadURL || existingToolkit.cover_img;
+
+    // Prepare updated values, using existing ones if new ones are not provided
+    const updatedTitle = title || existingToolkit.title;
+    const updatedDescription = description || existingToolkit.description;
+    const updatedTechniqueId = technique_id || existingToolkit.technique_id;
+
+    // Update the toolkit
+    const updateQuery = `
+      UPDATE Toolkit
+      SET title = $1, 
+          cover_img = $2, 
+          description = $3, 
+          technique_id = $4
+      WHERE id = $5
+      RETURNING *;
+    `;
+
+    const values = [
+      updatedTitle,
+      cover_img,
+      updatedDescription,
+      updatedTechniqueId,
+      toolkitId
+    ];
+
+    const { rows } = await db.query(updateQuery, values);
+
+    const updatedToolkit = rows[0];
     return res.status(200).json({
       success: true,
-      data: updatedTechnique,
+      data: updatedToolkit,
     });
   } catch (error) {
     console.error(error.message);
@@ -132,6 +154,9 @@ exports.updateToolkitById = async (req, res, formattedFileUrls) => {
     });
   }
 };
+
+
+
 
 // Delete a specific toolkit by ID
 exports.deleteToolkitById = async (req, res) => {

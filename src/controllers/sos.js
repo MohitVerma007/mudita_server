@@ -1,8 +1,8 @@
 const db = require("../../db.js");
 
 // Create a new SOS entry
-exports.createSOS = async (req, res, formattedFileUrls) => {
-  const { title, contact } = req.body;
+exports.createSOS = async (req, res) => {
+  const { title, contact, video } = req.body;
 
   try {
     const query = `
@@ -10,7 +10,6 @@ exports.createSOS = async (req, res, formattedFileUrls) => {
       VALUES ($1, $2, $3)
       RETURNING *;
     `;
-    const video = formattedFileUrls.video[0].downloadURL;
 
     const { rows } = await db.query(query, [title, video, contact]);
 
@@ -87,9 +86,9 @@ exports.getSOSById = async (req, res) => {
 };
 
 // Update a specific SOS entry by ID
-exports.updateSOSById = async (req, res, formattedFileUrls) => {
+exports.updateSOSById = async (req, res) => {
   const sosId = req.params.id;
-  const { title, contact } = req.body;
+  const { title, contact, video } = req.body;
 
   try {
     const query = `
@@ -98,7 +97,6 @@ exports.updateSOSById = async (req, res, formattedFileUrls) => {
       WHERE id = $4
       RETURNING *;
     `;
-    const video = formattedFileUrls.video[0].downloadURL;
 
     const { rows } = await db.query(query, [title, video, contact, sosId]);
 

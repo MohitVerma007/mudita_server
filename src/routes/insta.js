@@ -5,6 +5,7 @@ const {
   getInstaById,
   getAllInstas,
   deleteInstaById,
+  favInstaById,
 } = require("../controllers/insta");
 
 // Initialize Firebase
@@ -203,5 +204,7 @@ router.put("/update/:id", uploadMiddleware, async (req, res) => {
 router.get("/getbyId/:id", getInstaById);
 router.get("/getAll", getAllInstas);
 router.delete("/delete/:id", deleteInstaById);
+router.put("/fav/:id", favInstaById)
+
 
 module.exports = router;

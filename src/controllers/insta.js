@@ -177,3 +177,39 @@ exports.deleteInstaById = async (req, res) => {
     });
   }
 };
+
+
+
+// Lik Insta post by User ID
+exports.favInstaById = async (req, res) => {
+  const InstaId = req.params.id;
+  const { user_id } = req.body;
+
+  try {
+    const query = `
+      UPDATE Insta
+      SET fav = array_append(fav, $1)
+      WHERE id = $2
+      RETURNING *;
+    `;
+
+    const { rows } = await db.query(query, [user_id, InstaId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: "Insta post not found",
+      });
+    }
+
+    const updatedInsta = rows[0];
+    return res.status(200).json({
+      success: true,
+      data: updatedInsta,
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};

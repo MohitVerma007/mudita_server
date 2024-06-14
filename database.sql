@@ -146,7 +146,8 @@ CREATE TABLE insta (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     img VARCHAR(255),
-    video TEXT
+    video TEXT,
+    fav int[]
 );
 
 CREATE TABLE journal (
@@ -181,5 +182,14 @@ CREATE TABLE session (
     mentee_text TEXT,
     mentor_text TEXT,
     is_completed BOOLEAN DEFAULT FALSE,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE comment (
+    id SERIAL PRIMARY KEY,
+    description TEXT,
+    insta_id INT REFERENCES insta(id),
+    user_id INT REFERENCES users(user_id),
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

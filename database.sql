@@ -22,6 +22,7 @@ CREATE TABLE mentors (
     adharcard_front_img VARCHAR(255),
     adharcard_back_img VARCHAR(255),
     doctor_reg_cert_img VARCHAR(255),
+    is_approved BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
@@ -173,6 +174,23 @@ CREATE TABLE notes (
     user_id INT REFERENCES users(user_id)
 );
 
+CREATE TABLE time_slots (
+    slot_id SERIAL PRIMARY KEY,
+    slot_start TEXT NOT NULL,
+    slot_end TEXT NOT NULL,
+    day TEXT NOT NULL,
+    mentor_id INT NOT NULL REFERENCES users(user_id)
+);
+
+CREATE TABLE slot_request (
+    req_id SERIAL PRIMARY KEY,
+    status VARCHAR(10) CHECK (status IN ('pending', 'rejected', 'approved')) NOT NULL DEFAULT 'pending',
+    slot_id INT NOT NULL REFERENCES time_slots(slot_id),
+    mentor_id INT NOT NULL REFERENCES users(user_id),
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 CREATE TABLE session (
     session_id SERIAL PRIMARY KEY,
     mentee_id INT NOT NULL REFERENCES users(user_id),
@@ -182,6 +200,7 @@ CREATE TABLE session (
     mentee_text TEXT,
     mentor_text TEXT,
     is_completed BOOLEAN DEFAULT FALSE,
+    slot_id INT NOT NULL REFERENCES time_slots(slot_id),
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

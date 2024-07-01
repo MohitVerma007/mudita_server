@@ -40,6 +40,8 @@ const mail = require("./routes/mail");
 const { chatbot } = require("./chatbot/chatbot");
 const noteRoutes = require("./routes/notes");
 const commentRoutes = require("./routes/comment");
+const timeSlotRoutes = require("./routes/time_slot");
+const slotReqRoutes = require("./routes/slot_req");
 
 //initialize routes
 app.use("/api/v1", authRoutes);
@@ -60,6 +62,8 @@ app.use("/api/v1/alert", schedule_alert);
 app.use("/api/v1/email", mail);
 app.use("/api/v1/note", noteRoutes);
 app.use("/api/v1/comment", commentRoutes);
+app.use("/api/v1/time_slot", timeSlotRoutes);
+app.use("/api/v1/slot_req", slotReqRoutes);
 
 // Chatbot
 app.post("/api/v1/chatbot", chatbot);

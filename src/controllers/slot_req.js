@@ -6,11 +6,11 @@ exports.createSlotRequest = async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO slot_request (slot_id, mentor_id)
+      INSERT INTO slot_request (slot_id, mentee_id, mentor_id)
       VALUES ($1, $2)
       RETURNING *;
     `;
-    const { rows } = await db.query(query, [slot_id, mentor_id]);
+    const { rows } = await db.query(query, [slot_id, mentee_id, mentor_id]);
 
     const createdSlotRequest = rows[0];
     return res.status(201).json({

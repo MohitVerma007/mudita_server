@@ -187,6 +187,7 @@ CREATE TABLE slot_request (
     status VARCHAR(10) CHECK (status IN ('pending', 'rejected', 'approved')) NOT NULL DEFAULT 'pending',
     slot_id INT NOT NULL REFERENCES time_slots(slot_id),
     mentor_id INT NOT NULL REFERENCES users(user_id),
+    mentee_id INT NOT NULL REFERENCES users(user_id),
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

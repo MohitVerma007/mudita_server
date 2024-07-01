@@ -59,11 +59,11 @@ exports.getAllSlotRequests = async (req, res) => {
 
 // Get slot requests by mentor_id
 exports.getSlotRequestsByMentorId = async (req, res) => {
-  const mentorId = req.params.id;
+  const reqId = req.params.id;
 
   try {
-    const query = "SELECT * FROM slot_request WHERE mentor_id = $1";
-    const { rows } = await db.query(query, [mentorId]);
+    const query = "SELECT * FROM slot_request WHERE req_id = $1";
+    const { rows } = await db.query(query, [reqId]);
 
     if (rows.length === 0) {
       return res.status(404).json({

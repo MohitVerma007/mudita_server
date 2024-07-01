@@ -2,15 +2,15 @@ const db = require("../../db.js");
 
 // Create a slot request
 exports.createSlotRequest = async (req, res) => {
-  const { slot_id, mentor_id, mentee_id } = req.body;
+  const { mentor_id, mentee_id } = req.body;
 
   try {
     const query = `
-      INSERT INTO slot_request (slot_id, mentee_id, mentor_id)
-      VALUES ($1, $2, $3)
+      INSERT INTO slot_request ( mentee_id, mentor_id)
+      VALUES ($1, $2)
       RETURNING *;
     `;
-    const { rows } = await db.query(query, [slot_id, mentee_id, mentor_id]);
+    const { rows } = await db.query(query, [ mentee_id, mentor_id]);
 
     const createdSlotRequest = rows[0];
     return res.status(201).json({

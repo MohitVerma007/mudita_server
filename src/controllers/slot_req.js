@@ -7,7 +7,7 @@ exports.createSlotRequest = async (req, res) => {
   try {
     const query = `
       INSERT INTO slot_request (slot_id, mentee_id, mentor_id)
-      VALUES ($1, $2)
+      VALUES ($1, $2, $3)
       RETURNING *;
     `;
     const { rows } = await db.query(query, [slot_id, mentee_id, mentor_id]);

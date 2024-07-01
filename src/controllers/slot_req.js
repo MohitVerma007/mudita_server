@@ -2,7 +2,7 @@ const db = require("../../db.js");
 
 // Create a slot request
 exports.createSlotRequest = async (req, res) => {
-  const { slot_id, mentor_id } = req.body;
+  const { slot_id, mentor_id, mentee_id } = req.body;
 
   try {
     const query = `

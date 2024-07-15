@@ -204,6 +204,16 @@ CREATE TABLE session (
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE payment (
+    id SERIAL PRIMARY KEY,
+    payment_id VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(10) CHECK (status IN ('pending', 'success', 'failed')) NOT NULL DEFAULT 'pending',
+    mentee_id INT NOT NULL REFERENCES users(user_id),
+    slot_id INT NOT NULL REFERENCES time_slots(slot_id),
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 CREATE TABLE comment (
     id SERIAL PRIMARY KEY,

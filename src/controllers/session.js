@@ -151,7 +151,7 @@ exports.getAllSessions = async (req, res) => {
   }
 };
 
-// Get session by ID
+// Get session by session ID
 exports.getSessionById = async (req, res) => {
   const sessionId = req.params.id;
 
@@ -166,6 +166,33 @@ exports.getSessionById = async (req, res) => {
     }
 
     const session = rows[0];
+    return res.status(200).json({
+      success: true,
+      data: session,
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+// Get session by ID
+exports.getSessionByMenteeId = async (req, res) => {
+  const menteeId = req.params.id;
+
+  try {
+    const query = "SELECT * FROM session WHERE mentee_id = $1";
+    const { rows } = await db.query(query, [menteeId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: "Session not found",
+      });
+    }
+
+    const session = rows;
     return res.status(200).json({
       success: true,
       data: session,

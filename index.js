@@ -52,7 +52,7 @@ app.use("/api/v1/note", noteRoutes);
 
 // Chatbot
 app.post("/api/v1/chatbot", chatbot);
-
+// ok
 //app start
 const appStart = () => {
   try {

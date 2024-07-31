@@ -31,6 +31,7 @@ const schedule_alert = require("./src/routes/schedule_alerts");
 const mail = require("./src/routes/mail");
 const { chatbot } = require("./chatbot/chatbot");
 const noteRoutes = require("./src/routes/notes");
+// new
 
 //initialize routes
 app.use("/api/v1", authRoutes);

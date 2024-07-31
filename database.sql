@@ -222,3 +222,31 @@ CREATE TABLE comment (
     user_id INT REFERENCES users(user_id),
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Fees
+CREATE TABLE fees (
+    id SERIAL PRIMARY KEY,
+    amount DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Rewards
+CREATE TABLE rewards (
+    id SERIAL PRIMARY KEY,
+    mentor_id INT NOT NULL REFERENCES users(user_id),
+    points INT NOT NULL DEFAULT 0,
+    redeem INT NOT NULL DEFAULT 0,
+    earning_rupees DECIMAL(10, 2) NOT NULL DEFAULT 0.00
+);
+
+
+-- Redeem Request
+CREATE TABLE redeem_req (
+    id SERIAL PRIMARY KEY,
+    mentor_id INT NOT NULL REFERENCES users(user_id),
+    points INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    img TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

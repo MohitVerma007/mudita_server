@@ -42,6 +42,9 @@ const noteRoutes = require("./routes/notes");
 const commentRoutes = require("./routes/comment");
 const timeSlotRoutes = require("./routes/time_slot");
 const slotReqRoutes = require("./routes/slot_req");
+const feesRoutes = require("./routes/fees");
+const rewardRoutes = require("./routes/reward");
+const redeemdRoutes = require("./routes/redeem_req");
 
 //initialize routes
 app.use("/api/v1", authRoutes);
@@ -64,6 +67,9 @@ app.use("/api/v1/note", noteRoutes);
 app.use("/api/v1/comment", commentRoutes);
 app.use("/api/v1/time_slot", timeSlotRoutes);
 app.use("/api/v1/slot_req", slotReqRoutes);
+app.use("/api/v1/fees", feesRoutes);
+app.use("/api/v1/redeem", redeemdRoutes);
+app.use("/api/v1/reward", rewardRoutes);
 
 // Chatbot
 app.post("/api/v1/chatbot", chatbot);

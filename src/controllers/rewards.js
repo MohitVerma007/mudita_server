@@ -86,16 +86,16 @@ exports.getRewardsByMentorId = async (req, res) => {
 // Update a reward entry by id
 exports.updateRewardById = async (req, res) => {
   const rewardId = req.params.id;
-  const { mentor_id, points, redeem, earning_rupees } = req.body;
+  const { points, earning_rupees } = req.body;
 
   try {
     const query = `
       UPDATE rewards
-      SET mentor_id = $1, points = $2, redeem = $3, earning_rupees = $4
-      WHERE id = $5
+      SET points = points + $1, earning_rupees = $2
+      WHERE id = $3
       RETURNING *;
     `;
-    const { rows } = await db.query(query, [mentor_id, points, redeem, earning_rupees, rewardId]);
+    const { rows } = await db.query(query, [points, earning_rupees, rewardId]);
 
     if (rows.length === 0) {
       return res.status(404).json({

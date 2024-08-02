@@ -218,7 +218,7 @@ CREATE TABLE payment (
 CREATE TABLE comment (
     id SERIAL PRIMARY KEY,
     description TEXT,
-    insta_id INT REFERENCES insta(id),
+    insta_id INT REFERENCES insta(id) ON DELETE CASCADE,
     user_id INT REFERENCES users(user_id),
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

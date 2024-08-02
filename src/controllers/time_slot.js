@@ -62,7 +62,7 @@ exports.getTimeSlotsByMentorId = async (req, res) => {
   const slot = req.params.id;
 
   try {
-    const query = "SELECT * FROM time_slots WHERE slot_id = $1";
+    const query = "SELECT * FROM time_slots WHERE mentor_id = $1";
     const { rows } = await db.query(query, [slot]);
 
     if (rows.length === 0) {

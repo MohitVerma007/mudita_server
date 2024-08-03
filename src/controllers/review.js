@@ -1,21 +1,21 @@
 const db = require("../../db.js");
 
-// Create a reward entry
-exports.createReward = async (req, res) => {
-  const { mentor_id, points, earning_rupees } = req.body;
+// Create a review entry
+exports.createReview = async (req, res) => {
+  const { mentor_id, user_id, rating, content } = req.body;
 
   try {
     const query = `
-      INSERT INTO rewards (mentor_id, points, earning_rupees)
-      VALUES ($1, $2, $3)
+      INSERT INTO reviews (mentor_id, users_id, rating, content)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const { rows } = await db.query(query, [mentor_id, points, earning_rupees]);
+    const { rows } = await db.query(query, [mentor_id, user_id, rating, content]);
 
-    const createdReward = rows[0];
+    const createdReview = rows[0];
     return res.status(201).json({
       success: true,
-      data: createdReward,
+      data: createdReview,
     });
   } catch (error) {
     console.error(error.message);
@@ -25,17 +25,17 @@ exports.createReward = async (req, res) => {
   }
 };
 
-// Get all reward entries with pagination
-exports.getAllRewards = async (req, res) => {
+// Get all review entries with pagination
+exports.getAllReviews = async (req, res) => {
   const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 per page
   const offset = (page - 1) * limit;
 
   try {
-    const totalCountQuery = "SELECT COUNT(*) FROM rewards";
+    const totalCountQuery = "SELECT COUNT(*) FROM reviews";
     const totalCountResult = await db.query(totalCountQuery);
     const totalCount = parseInt(totalCountResult.rows[0].count);
 
-    const query = "SELECT * FROM rewards LIMIT $1 OFFSET $2";
+    const query = "SELECT * FROM reviews LIMIT $1 OFFSET $2";
     const { rows } = await db.query(query, [limit, offset]);
 
     const response = {
@@ -57,23 +57,23 @@ exports.getAllRewards = async (req, res) => {
   }
 };
 
-// Get reward entries by mentor_id
-exports.getRewardsByMentorId = async (req, res) => {
-  const mentorId = req.params.id;
+// Get a review entry by id
+exports.getReviewById = async (req, res) => {
+  const reviewId = req.params.id;
 
   try {
-    const query = "SELECT * FROM rewards WHERE mentor_id = $1";
-    const { rows } = await db.query(query, [mentorId]);
+    const query = "SELECT * FROM reviews WHERE review_id = $1";
+    const { rows } = await db.query(query, [reviewId]);
 
     if (rows.length === 0) {
       return res.status(404).json({
-        error: "Rewards not found",
+        error: "Review not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: rows,
+      data: rows[0],
     });
   } catch (error) {
     console.error(error.message);
@@ -83,30 +83,30 @@ exports.getRewardsByMentorId = async (req, res) => {
   }
 };
 
-// Update a reward entry by id
-exports.updateRewardById = async (req, res) => {
-  const rewardId = req.params.id;
-  const { points, earning_rupees } = req.body;
+// Update a review entry by id
+exports.updateReviewById = async (req, res) => {
+  const reviewId = req.params.id;
+  const { rating, content } = req.body;
 
   try {
     const query = `
-      UPDATE rewards
-      SET points = points + $1, earning_rupees = earning_rupees + $2
-      WHERE id = $3
+      UPDATE reviews
+      SET rating = $1, content = $2
+      WHERE review_id = $3
       RETURNING *;
     `;
-    const { rows } = await db.query(query, [points, earning_rupees, rewardId]);
+    const { rows } = await db.query(query, [rating, content, reviewId]);
 
     if (rows.length === 0) {
       return res.status(404).json({
-        error: "Reward not found",
+        error: "Review not found",
       });
     }
 
-    const updatedReward = rows[0];
+    const updatedReview = rows[0];
     return res.status(200).json({
       success: true,
-      data: updatedReward,
+      data: updatedReview,
     });
   } catch (error) {
     console.error(error.message);
@@ -116,25 +116,25 @@ exports.updateRewardById = async (req, res) => {
   }
 };
 
-// Delete a reward entry by id
-exports.deleteRewardById = async (req, res) => {
-  const rewardId = req.params.id;
+// Delete a review entry by id
+exports.deleteReviewById = async (req, res) => {
+  const reviewId = req.params.id;
 
   try {
-    const query = "DELETE FROM rewards WHERE id = $1 RETURNING *";
-    const { rows } = await db.query(query, [rewardId]);
+    const query = "DELETE FROM reviews WHERE review_id = $1 RETURNING *";
+    const { rows } = await db.query(query, [reviewId]);
 
     if (rows.length === 0) {
       return res.status(404).json({
-        error: "Reward not found",
+        error: "Review not found",
       });
     }
 
-    const deletedReward = rows[0];
+    const deletedReview = rows[0];
     return res.status(200).json({
       success: true,
-      message: "Reward successfully deleted",
-      data: deletedReward,
+      message: "Review successfully deleted",
+      data: deletedReview,
     });
   } catch (error) {
     console.error(error.message);

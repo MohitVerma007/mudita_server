@@ -250,3 +250,13 @@ CREATE TABLE redeem_req (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Review
+CREATE TABLE reviews (
+    review_id SERIAL PRIMARY KEY,
+    mentor_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+    users_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

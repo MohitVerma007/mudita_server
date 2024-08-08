@@ -46,9 +46,11 @@ const feesRoutes = require("./routes/fees");
 const rewardRoutes = require("./routes/reward");
 const redeemdRoutes = require("./routes/redeem_req");
 const reviewRoutes = require("./routes/review");
+const forgot_pwdRoutes = require("./routes/forgot_pwd")
 
 //initialize routes
 app.use("/api/v1", authRoutes);
+app.use("/api/v1/forgot_pwd", forgot_pwdRoutes);
 app.use("/api/v1/quiz", quizRoutes);
 app.use("/api/v1/session", sessionRoutes);
 app.use("/api/v1/question", questionRoutes);

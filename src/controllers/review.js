@@ -59,11 +59,11 @@ exports.getAllReviews = async (req, res) => {
 
 // Get a review entry by id
 exports.getReviewById = async (req, res) => {
-  const reviewId = req.params.id;
+  const mentor_id = req.params.id;
 
   try {
-    const query = "SELECT * FROM reviews WHERE review_id = $1";
-    const { rows } = await db.query(query, [reviewId]);
+    const query = "SELECT * FROM reviews WHERE mentor_id = $1";
+    const { rows } = await db.query(query, [mentor_id]);
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -71,10 +71,26 @@ exports.getReviewById = async (req, res) => {
       });
     }
 
+
+    const avgRatingQuery = `
+    SELECT AVG(rating) AS avg_rating
+    FROM reviews
+    WHERE mentor_id = $1
+  `;
+  const { rows: avgRows } = await db.query(avgRatingQuery, [mentor_id]);
+
+  const avgRating = parseFloat(avgRows[0].avg_rating).toFixed(1);
+
+
+
+    // const avg = rows.length /
+
     return res.status(200).json({
       success: true,
-      data: rows[0],
+      data: rows,
+      avg: avgRating,
     });
+
   } catch (error) {
     console.error(error.message);
     return res.status(500).json({

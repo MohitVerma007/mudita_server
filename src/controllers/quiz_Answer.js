@@ -83,3 +83,33 @@ exports.getUserScores = async (req, res) => {
     });
   }
 };
+
+exports.getUserAllScores = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const query = `
+      SELECT *
+      FROM UserScores
+      WHERE user_id = $1;
+    `;
+    const { rows } = await db.query(query, [user_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: "User score not found for the specified user and quiz",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: rows, // Assuming there's only one row for a given user and quiz combination
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      error: "Failed to retrieve user score",
+    });
+  }
+};
+

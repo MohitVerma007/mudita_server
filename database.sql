@@ -8,6 +8,7 @@ CREATE TABLE users (
     role VARCHAR(10) CHECK (role IN ('mentor', 'mentee', 'admin')),
     profile_img TEXT,
     address VARCHAR(255),
+    visibility BOOLEAN DEFAULT TRUE,
     created_at DATE DEFAULT CURRENT_DATE
 );
 
@@ -113,6 +114,7 @@ CREATE TABLE Technique (
     file VARCHAR(255),
     description TEXT,
     music VARCHAR(255),
+    time INTEGER,
     type VARCHAR(10) CHECK (type IN ('music', 'without music')),
     cover_img VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

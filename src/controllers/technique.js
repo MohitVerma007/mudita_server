@@ -2,12 +2,12 @@ const db = require("../../db.js");
 
 // Create a new technique
 exports.createTechnique = async (req, res, formattedFileUrls) => {
-  const { title, description, type } = req.body;
+  const { title, description, type, time } = req.body;
 
   try {
     const query = `
-      INSERT INTO Technique (title, file, description, music, cover_img, type)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO Technique (title, file, description, music, cover_img, type, time)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *;
     `;
     const gif = formattedFileUrls.gif[0].downloadURL;
@@ -21,6 +21,7 @@ exports.createTechnique = async (req, res, formattedFileUrls) => {
       music,
       cover_img,
       type,
+      time,
     ]);
 
     const createdTechnique = rows[0];
@@ -98,13 +99,13 @@ exports.getTechniqueById = async (req, res) => {
 // Update a specific technique by ID
 exports.updateTechniqueById = async (req, res, formattedFileUrls) => {
   const techniqueId = req.params.id;
-  const { title, description, type } = req.body;
+  const { title, description, type, time } = req.body;
 
   try {
     const query = `
       UPDATE Technique
-      SET title = $1, file = $2, description = $3, music = $4, cover_img = $5, type = $6
-      WHERE id = $7
+      SET title = $1, file = $2, description = $3, music = $4, cover_img = $5, type = $6, time = $7
+      WHERE id = $8
       RETURNING *;
     `;
     const gif = formattedFileUrls.gif[0].downloadURL;
@@ -118,6 +119,7 @@ exports.updateTechniqueById = async (req, res, formattedFileUrls) => {
       music,
       cover_img,
       type,
+      time,
       techniqueId,
     ]);
 

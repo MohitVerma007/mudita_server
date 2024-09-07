@@ -440,20 +440,7 @@ async function deleteFileFromStorage(fileUrl) {
   }
 }
 
-/*
-async function deleteFileFromStorage(fileUrl) {
-  try {
-    const fileNameWithEncoding = fileUrl.split("/").pop().split("?")[0];
-    const fileDecoded = decodeURIComponent(fileNameWithEncoding);
-    const desertRef = ref(storage, fileDecoded);
-    await deleteObject(desertRef);
-    console.log("Deleted file from bucket");
-  } catch (error) {
-    console.error("Error deleting file from bucket:", error.message);
-    throw error;
-  }
-}
-*/
+
 
 // Update Mentee Profile
 exports.updateMenteeProfile = async (req, res, formattedFileUrls) => {
@@ -722,123 +709,6 @@ exports.updateMentorProfile = async (req, res, formattedFileUrls) => {
   }
 };
 
-// Without Del files during update profile
-
-/*
-exports.updateMentorProfile = async (req, res, formattedFileUrls) => {
-  const { user_id } = req.params;
-  const {
-    name,
-    gender,
-    address,
-    mobile,
-    experience,
-    degree,
-    medical_lic_num,
-  } = req.body;
-
-  try {
-    const dbQueries = [];
-
-    // Fetch all mentor-specific information from the database
-    const userInfoQuery = `
-      SELECT profile_img
-      FROM users
-      WHERE user_id = $1;
-    `;
-    const userInfoResult = await db.query(userInfoQuery, [user_id]);
-    const userInfo = userInfoResult.rows[0];
-
-    // Fetch All Mentor's Details
-    const mentorInfoQuery = `
-      SELECT pancard_img, adharcard_front_img, adharcard_back_img, doctor_reg_cert_img
-      FROM mentors
-      WHERE user_id = $1;
-    `;
-    const mentorInfoResult = await db.query(mentorInfoQuery, [user_id]);
-    const mentorInfo = mentorInfoResult.rows[0];
-
-    // Check if formattedFileUrls is empty, if so, use previous values
-    if (!formattedFileUrls) {
-      console.log("Formatted file URLs are empty. Using previous values.");
-      formattedFileUrls = {};
-    }
-
-    // Check if profile_img is uploaded, if not, use the previous value
-    const profile_img = formattedFileUrls.profile_img?.[0]?.downloadURL;
-
-    const pancard_img = formattedFileUrls.pancard_img?.[0]?.downloadURL;
-
-    const adharcard_front_img =
-      formattedFileUrls.adharcard_front_img?.[0]?.downloadURL;
-
-    const adharcard_back_img =
-      formattedFileUrls.adharcard_back_img?.[0]?.downloadURL;
-
-    const doctor_reg_cert_img =
-      formattedFileUrls.doctor_reg_cert_img?.[0]?.downloadURL;
-
-    // Update the user's basic information
-    const updateUserQuery = `
-      UPDATE users
-      SET name = $1, gender = $2, address = $3, mobile = $4, profile_img = $5
-      WHERE user_id = $6
-      RETURNING *;
-    `;
-    const updateUserValues = [
-      name,
-      gender,
-      address,
-      mobile,
-      profile_img,
-      user_id,
-    ];
-    dbQueries.push(db.query(updateUserQuery, updateUserValues));
-
-    // Update the mentor-specific information
-    const updateMentorQuery = `
-      UPDATE mentors
-      SET experience = $1, degree = $2, medical_lic_num = $3, pancard_img = $4, adharcard_front_img = $5, adharcard_back_img = $6, doctor_reg_cert_img = $7
-      WHERE user_id = $8;
-    `;
-    const updateMentorValues = [
-      experience,
-      degree,
-      medical_lic_num,
-      pancard_img,
-      adharcard_front_img,
-      adharcard_back_img,
-      doctor_reg_cert_img,
-      user_id,
-    ];
-    dbQueries.push(db.query(updateMentorQuery, updateMentorValues));
-    console.log("All Queries", updateMentorValues);
-
-    // Execute all queries in parallel
-    const results = await Promise.all(dbQueries);
-
-    const updatedUser = results[0].rows[0]; // Fetch the updated user details
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Mentor profile updated successfully",
-      // user: updatedUser, // Return the updated user details
-    });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
-};
-*/
 
 // Is Approved API
 exports.approveMentorProfile = async (req, res) => {
@@ -875,5 +745,55 @@ exports.deleteAllMentee = async function deleteAllMentees(req, res) {
   } catch (error) {
     console.error("Error nullifying FCM tokens:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+exports.updateVisibility = async (req, res) => {
+  const user_id = req.params.user_id; // Assuming user_id is available in the request
+  const { visibility } = req.body; // Expecting visibility in the request body
+
+  try {
+    // Fetch the current visibility status of the user
+    const userInfoQuery = `
+      SELECT visibility
+      FROM users
+      WHERE user_id = $1;
+    `;
+    const userInfoResult = await db.query(userInfoQuery, [user_id]);
+    const userInfo = userInfoResult.rows[0];
+
+    if (!userInfo) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Set visibility to the provided value or default to the current one if not provided
+    const newVisibility = visibility !== undefined ? visibility : userInfo.visibility;
+
+    // Update the user's visibility status
+    const updateVisibilityQuery = `
+      UPDATE users
+      SET visibility = $1
+      WHERE user_id = $2
+      RETURNING *; -- Return all columns of the updated user
+    `;
+    const updateVisibilityValues = [newVisibility, user_id];
+    const updatedUserResult = await db.query(updateVisibilityQuery, updateVisibilityValues);
+    const updatedUser = updatedUserResult.rows[0]; // Fetch the updated user details
+
+    return res.status(200).json({
+      success: true,
+      message: "User visibility updated successfully",
+      // user: updatedUser, // Return the updated user details if needed
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };

@@ -13,6 +13,7 @@ const {
   updateMenteeProfile,
   approveMentorProfile,
   deleteAllMentee,
+  updateVisibility,
 } = require("../controllers/auth");
 const {
   validationMiddleware,
@@ -328,6 +329,7 @@ router.put(
 );
 
 // Approve Mentor Profile
-router.get("/approveMentor/:user_id", approveMentorProfile);
+router.patch("/approveMentor/:user_id", approveMentorProfile);
+router.patch("/updateVisibiity/:user_id", updateVisibility);
 
 module.exports = router;

@@ -8,6 +8,11 @@ const cors = require("cors");
 //import passport middleware
 require("./src/middlewares/passport-middleware");
 
+
+// Middleware to serve static files from the uploads directory
+app.use('./uploads', express.static('uploads'));
+
+
 //initialize middlewares
 app.use(express.json());
 app.use(cookieParser());

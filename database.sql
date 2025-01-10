@@ -115,7 +115,7 @@ CREATE TABLE Technique (
     description TEXT,
     music VARCHAR(255),
     time INTEGER,
-    type VARCHAR(10) CHECK (type IN ('music', 'without music')),
+    type VARCHAR(20) CHECK (type IN ('music', 'without music')),
     cover_img VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

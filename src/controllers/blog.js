@@ -1,26 +1,26 @@
 const db = require("../../db.js");
-
-// ****** Firebase Setup Start  ******
-
-const admin = require("firebase-admin");
-const { firebaseConfig } = require("../config/firebase_config");
-const { getStorage, ref, deleteObject } = require("firebase/storage");
-const storage = getStorage();
-
-// **** Firebase Setup End ******
+const fs = require("fs");
+const path = require("path");
 
 // Create a new blog post
-exports.createBlog = async (req, res, formattedFileUrls) => {
+exports.createBlog = async (req, res) => {
   const { title, description } = req.body;
 
   try {
+    let cover_img = null;
+
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/blog/${req.file.filename}`;
+    }
+
     const query = `
       INSERT INTO Blog (title, cover_img, description)
       VALUES ($1, $2, $3)
       RETURNING *;
     `;
 
-    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
     const { rows } = await db.query(query, [title, cover_img, description]);
 
     const createdBlog = rows[0];
@@ -35,6 +35,89 @@ exports.createBlog = async (req, res, formattedFileUrls) => {
     });
   }
 };
+
+// Update blog post by ID
+exports.updateBlogById = async (req, res) => {
+  const blogId = req.params.id;
+  const { title, description } = req.body;
+
+  try {
+    let cover_img = null;
+
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/blog/${req.file.filename}`;
+    }
+
+
+    const query = `
+      UPDATE Blog
+      SET title = $1, cover_img = COALESCE($2, cover_img), description = $3
+      WHERE id = $4
+      RETURNING *;
+    `;
+
+    const { rows } = await db.query(query, [title, cover_img, description, blogId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: "Blog post not found",
+      });
+    }
+
+    const updatedBlog = rows[0];
+    return res.status(200).json({
+      success: true,
+      data: updatedBlog,
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+// Delete blog post by ID
+exports.deleteBlogById = async (req, res) => {
+  const blogId = req.params.id;
+
+  try {
+    const query = "DELETE FROM Blog WHERE id = $1 RETURNING *";
+    const { rows } = await db.query(query, [blogId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: "Blog post not found",
+      });
+    }
+
+    const deletedBlog = rows[0];
+    const previewUrl = deletedBlog.cover_img;
+
+    // Remove the uploaded file from the server (if applicable)
+    if (previewUrl) {
+      const filePath = path.join(__dirname, "../../uploads/blog", path.basename(previewUrl));
+      fs.unlink(filePath, (err) => {
+        if (err) console.error("Error deleting file:", err.message);
+        else console.log("File deleted successfully");
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      is_deleted: "Successfully Deleted!",
+      data: deletedBlog,
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
 
 // Get all blog posts with pagination
 exports.getAllBlogs = async (req, res) => {
@@ -86,94 +169,6 @@ exports.getBlogById = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: blog,
-    });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
-};
-
-// Update blog post by ID
-exports.updateBlogById = async (req, res, formattedFileUrls) => {
-  const blogId = req.params.id;
-  const { title, description } = req.body;
-
-  try {
-    const query = `
-      UPDATE Blog
-      SET title = $1, cover_img = $2, description = $3
-      WHERE id = $4
-      RETURNING *;
-    `;
-    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
-
-    const { rows } = await db.query(query, [
-      title,
-      cover_img,
-      description,
-      blogId,
-    ]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({
-        error: "Blog post not found",
-      });
-    }
-
-    const updatedBlog = rows[0];
-    return res.status(200).json({
-      success: true,
-      data: updatedBlog,
-    });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
-};
-
-// Delete blog post by ID
-exports.deleteBlogById = async (req, res) => {
-  const blogId = req.params.id;
-
-  try {
-    const query = "DELETE FROM Blog WHERE id = $1 RETURNING *";
-    const { rows } = await db.query(query, [blogId]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({
-        error: "Blog post not found",
-      });
-    }
-
-    const deletedBlog = rows[0];
-    console.log(rows[0].cover_img);
-
-    const previewUrl = rows[0].cover_img;
-    // Extract the file name from the preview URL
-    const fileNameWithEncoding = previewUrl.split("/").pop().split("?")[0];
-    const fileUrl = decodeURIComponent(fileNameWithEncoding);
-
-    const desertRef = ref(storage, `${fileUrl}`);
-
-    // Delete the file
-    deleteObject(desertRef)
-      .then(() => {
-        // File deleted successfully
-        console.log("Deleted file from bucket");
-      })
-      .catch((error) => {
-        // Uh-oh, an error occurred!
-        console.error(error.message);
-      });
-
-    return res.status(200).json({
-      success: true,
-      is_deleted: "successfully Deleted !",
-      data: deletedBlog,
     });
   } catch (error) {
     console.error(error.message);

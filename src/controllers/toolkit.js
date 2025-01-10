@@ -1,7 +1,9 @@
 const db = require("../../db.js");
+const fs = require("fs");
+const path = require("path");
 
 // Create a new toolkit
-exports.createToolkit = async (req, res, formattedFileUrls) => {
+exports.createToolkit = async (req, res) => {
   const { title, description, technique_id } = req.body;
 
   try {
@@ -10,7 +12,13 @@ exports.createToolkit = async (req, res, formattedFileUrls) => {
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
+    let cover_img = null;
+
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/toolkit/${req.file.filename}`;
+    }
 
     const { rows } = await db.query(query, [
       title,
@@ -92,7 +100,7 @@ exports.getToolkitById = async (req, res) => {
 };
 
 // Update a specific Toolkit by ID
-exports.updateToolkitById = async (req, res, formattedFileUrls) => {
+exports.updateToolkitById = async (req, res) => {
   const toolkitId = req.params.id;
   const { title, description, technique_id } = req.body;
 
@@ -114,8 +122,13 @@ exports.updateToolkitById = async (req, res, formattedFileUrls) => {
     const existingToolkit = existingResult.rows[0];
 
     // Determine the new cover_img URL, if available
-    const cover_img = formattedFileUrls?.cover_img?.[0]?.downloadURL || existingToolkit.cover_img;
+    let cover_img = existingToolkit.cover_img;
 
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/toolkit/${req.file.filename}`;
+    }
     // Prepare updated values, using existing ones if new ones are not provided
     const updatedTitle = title || existingToolkit.title;
     const updatedDescription = description || existingToolkit.description;

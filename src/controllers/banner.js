@@ -1,7 +1,9 @@
 const db = require("../../db.js");
+const fs = require("fs");
+const path = require("path");
 
 // Create a new banner
-exports.createBanner = async (req, res, formattedFileUrls) => {
+exports.createBanner = async (req, res) => {
   const { title, subtitle, link } = req.body;
 
   try {
@@ -11,7 +13,13 @@ exports.createBanner = async (req, res, formattedFileUrls) => {
       RETURNING *;
     `;
 
-    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
+    let cover_img = null;
+
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/banner/${req.file.filename}`;
+    }
 
     const { rows } = await db.query(query, [title, subtitle, link, cover_img]);
 
@@ -88,7 +96,7 @@ exports.getBannerById = async (req, res) => {
 };
 
 // Update a specific banner by ID
-exports.updateBannerById = async (req, res, formattedFileUrls) => {
+exports.updateBannerById = async (req, res) => {
   const bannerId = req.params.id;
   const { title, subtitle, link } = req.body;
 
@@ -99,8 +107,13 @@ exports.updateBannerById = async (req, res, formattedFileUrls) => {
       WHERE id = $5
       RETURNING *;
     `;
-    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
+    let cover_img = null;
 
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/banner/${req.file.filename}`;
+    }
     const { rows } = await db.query(query, [
       title,
       subtitle,
@@ -129,6 +142,7 @@ exports.updateBannerById = async (req, res, formattedFileUrls) => {
 };
 
 // Delete a specific banner by ID
+
 exports.deleteBannerById = async (req, res) => {
   const bannerId = req.params.id;
 
@@ -143,9 +157,28 @@ exports.deleteBannerById = async (req, res) => {
     }
 
     const deletedBanner = rows[0];
+    const coverImgUrl = deletedBanner.cover_img; // Adjust to match your DB column name for the image URL
+
+    // Remove the associated cover image file from the server
+    if (coverImgUrl) {
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/banner", // Adjust based on your upload folder structure
+        path.basename(coverImgUrl)
+      );
+
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting cover image file:", err.message);
+        } else {
+          console.log("Cover image file deleted successfully");
+        }
+      });
+    }
+
     return res.status(200).json({
       success: true,
-      is_deleted: "successfully Deleted !",
+      is_deleted: "Successfully Deleted!",
       data: deletedBanner,
     });
   } catch (error) {

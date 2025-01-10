@@ -29,7 +29,7 @@ const faqRoutes = require("./src/routes/faq");
 const journalRoutes = require("./src/routes/journal");
 const schedule_alert = require("./src/routes/schedule_alerts");
 const mail = require("./src/routes/mail");
-const { chatbot } = require("./chatbot/chatbot");
+const { chatbot } = require("./src/chatbot/chatbot");
 const noteRoutes = require("./src/routes/notes");
 // new
 

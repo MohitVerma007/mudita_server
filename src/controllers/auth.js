@@ -2,13 +2,7 @@ const db = require("../../db.js");
 const { hash } = require("bcryptjs");
 const { sign } = require("jsonwebtoken");
 const { SECRET } = require("../constants");
-const { initializeApp } = require("firebase/app");
 
-const admin = require("firebase-admin");
-const { firebaseConfig } = require("../config/firebase_config");
-initializeApp(firebaseConfig);
-const { getStorage, ref, deleteObject } = require("firebase/storage");
-const storage = getStorage();
 // Get By Id Mentees
 
 exports.getMenteeById = async (req, res) => {
@@ -230,100 +224,43 @@ exports.registerMentee = async (req, res) => {
 };
 
 // Register Mentors
-
-/*
 exports.registerMentor = async (req, res) => {
-  const { name, email, password, gender, address, mobile } = req.body;
-  const {
-    experience,
-    degree,
-    medical_lic_num,
-    pancard_img,
-    adharcard_front_img,
-    adharcard_back_img,
-    doctor_reg_cert_img,
-  } = req.body;
-
-  try {
-    // Hash the password before storing it
-    const hashedPassword = await hash(password, 10);
-
-    // Step 1: Insert data into the 'users' table
-    const userInsertQuery = `
-      INSERT INTO users(name, email, password, gender, address, mobile, role)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING user_id;
-    `;
-
-    const userInsertValues = [
-      name,
-      email,
-      hashedPassword,
-      gender,
-      address,
-      mobile,
-      "mentor",
-    ];
-
-    const { rows } = await db.query(userInsertQuery, userInsertValues);
-
-    // Retrieve the user_id generated during the insertion
-    const userId = rows[0].user_id;
-
-    // Step 2: Insert data into the 'mentors' table
-    const mentorInsertQuery = `
-      INSERT INTO mentors(user_id, experience, degree, medical_lic_num, pancard_img, adharcard_front_img, adharcard_back_img, doctor_reg_cert_img)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
-    `;
-
-    const mentorInsertValues = [
-      userId,
-      experience,
-      degree,
-      medical_lic_num,
-      pancard_img,
-      adharcard_front_img,
-      adharcard_back_img,
-      doctor_reg_cert_img,
-    ];
-
-    await db.query(mentorInsertQuery, mentorInsertValues);
-
-    return res.status(201).json({
-      success: true,
-      message: "The Mentor registration was successful",
-    });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
-};
-*/
-
-exports.registerMentor = async (req, res, formattedFileUrls) => {
   const { name, email, password, gender, address, mobile } = req.body;
   const { experience, degree, medical_lic_num } = req.body;
 
   try {
-    // Hash the password before storing it
+    // Step 1: Hash the password
     const hashedPassword = await hash(password, 10);
-    const pancard_img = formattedFileUrls.pancard_img[0].downloadURL;
-    const adharcard_front_img =
-      formattedFileUrls.adharcard_front_img[0].downloadURL;
-    const adharcard_back_img =
-      formattedFileUrls.adharcard_back_img[0].downloadURL;
-    const doctor_reg_cert_img =
-      formattedFileUrls.doctor_reg_cert_img[0].downloadURL;
 
-    // Step 1: Insert data into the 'users' table
+    // Step 2: Prepare default values for file URLs
+    const domain = process.env.DOMAIN || 'http://localhost:8000';
+    let pancard_img = '';
+    let adharcard_front_img = '';
+    let adharcard_back_img = '';
+    let doctor_reg_cert_img = '';
+
+    // Step 3: Check and set file URLs if uploaded
+    if (req.files) {
+      if (req.files['pancard_img']) {
+        pancard_img = `${domain}/uploads/user/${req.files['pancard_img'][0].filename}`;
+      }
+      if (req.files['adharcard_front_img']) {
+        adharcard_front_img = `${domain}/uploads/user/${req.files['adharcard_front_img'][0].filename}`;
+      }
+      if (req.files['adharcard_back_img']) {
+        adharcard_back_img = `${domain}/uploads/user/${req.files['adharcard_back_img'][0].filename}`;
+      }
+      if (req.files['doctor_reg_cert_img']) {
+        doctor_reg_cert_img = `${domain}/uploads/user/${req.files['doctor_reg_cert_img'][0].filename}`;
+      }
+    }
+
+    // Step 4: Insert data into the 'users' table
     const userInsertQuery = `
-      INSERT INTO users(name, email, password, gender, address, mobile, role)
+      INSERT INTO users (name, email, password, gender, address, mobile, role)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING user_id, email;
     `;
-
     const userInsertValues = [
       name,
       email,
@@ -336,16 +273,14 @@ exports.registerMentor = async (req, res, formattedFileUrls) => {
 
     const { rows } = await db.query(userInsertQuery, userInsertValues);
 
-    // Retrieve the user_id and email generated during the insertion
+    // Step 5: Retrieve the user_id and email generated during insertion
     const userId = rows[0].user_id;
-    const userEmail = rows[0].email;
 
-    // Step 2: Insert data into the 'mentors' table
+    // Step 6: Insert data into the 'mentors' table
     const mentorInsertQuery = `
-      INSERT INTO mentors(user_id, experience, degree, medical_lic_num, pancard_img, adharcard_front_img, adharcard_back_img, doctor_reg_cert_img)
+      INSERT INTO mentors (user_id, experience, degree, medical_lic_num, pancard_img, adharcard_front_img, adharcard_back_img, doctor_reg_cert_img)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
     `;
-
     const mentorInsertValues = [
       userId,
       experience,
@@ -359,13 +294,23 @@ exports.registerMentor = async (req, res, formattedFileUrls) => {
 
     await db.query(mentorInsertQuery, mentorInsertValues);
 
-    // Log in the user automatically after successful registration
-    req.user = { user_id: userId, email: userEmail };
+    // Step 7: Log the user in automatically after registration
+    req.user = { user_id: userId, email: rows[0].email };
     return exports.login(req, res);
   } catch (error) {
-    console.error(error.message);
+    // Handle unique constraint violations (e.g., duplicate email)
+    if (error.code === '23505') {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already in use.',
+      });
+    }
+
+    // Generic error handling
+    console.error('Error during mentor registration:', error);
     return res.status(500).json({
-      error: error.message,
+      success: false,
+      message: 'An error occurred during mentor registration.',
     });
   }
 };
@@ -422,289 +367,223 @@ exports.logout = async (req, res) => {
 };
 
 // Update Profile
-// firebase func For handling file duplicancy
-async function deleteFileFromStorage(fileUrl) {
-  try {
-    const fileNameWithEncoding = fileUrl.split("/").pop().split("?")[0];
-    const fileDecoded = decodeURIComponent(fileNameWithEncoding);
-    const desertRef = ref(storage, fileDecoded);
-    await deleteObject(desertRef);
-    console.log("Deleted file from bucket");
-  } catch (error) {
-    if (error.code === "storage/object-not-found") {
-      console.log("File does not exist in bucket:", fileUrl);
-    } else {
-      console.error("Error deleting file from bucket:", error.message);
-      throw error;
-    }
-  }
-}
+// // firebase func For handling file duplicancy
+// async function deleteFileFromStorage(fileUrl) {
+//   try {
+//     const fileNameWithEncoding = fileUrl.split("/").pop().split("?")[0];
+//     const fileDecoded = decodeURIComponent(fileNameWithEncoding);
+//     const desertRef = ref(storage, fileDecoded);
+//     await deleteObject(desertRef);
+//     console.log("Deleted file from bucket");
+//   } catch (error) {
+//     if (error.code === "storage/object-not-found") {
+//       console.log("File does not exist in bucket:", fileUrl);
+//     } else {
+//       console.error("Error deleting file from bucket:", error.message);
+//       throw error;
+//     }
+//   }
+// }
 
 
 
 // Update Mentee Profile
-exports.updateMenteeProfile = async (req, res, formattedFileUrls) => {
-  const { user_id } = req.params; // Assuming user_id is available in the request
+exports.updateMenteeProfile = async (req, res) => {
+  const { user_id } = req.params; // Assuming user_id is provided in the request
   const { name, gender, dob, address, mobile, occupation, token } = req.body;
 
   try {
+    // Step 1: Retrieve existing user and mentee details
     const userInfoQuery = `
-    SELECT  name, gender, address, mobile, profile_img
-    FROM users
-    WHERE user_id = $1;
-  `;
-    const userInfoResult = await db.query(userInfoQuery, [user_id]);
-    const userInfo = userInfoResult.rows[0];
-
+      SELECT name, gender, address, mobile, profile_img
+      FROM users
+      WHERE user_id = $1;
+    `;
     const menteeInfoQuery = `
-    SELECT  dob, occupation, fcm_token
-    FROM mentees
-    WHERE user_id = $1;
-  `;
-    const menteeInfoResult = await db.query(menteeInfoQuery, [user_id]);
+      SELECT dob, occupation, fcm_token
+      FROM mentees
+      WHERE user_id = $1;
+    `;
+    const [userInfoResult, menteeInfoResult] = await Promise.all([
+      db.query(userInfoQuery, [user_id]),
+      db.query(menteeInfoQuery, [user_id]),
+    ]);
+
+    if (userInfoResult.rows.length === 0 || menteeInfoResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User or mentee not found",
+      });
+    }
+
+    const userInfo = userInfoResult.rows[0];
     const menteeInfo = menteeInfoResult.rows[0];
 
-    const myname = name || userInfo.name;
-    const mygender = gender || userInfo.gender;
-    const myaddress = address || userInfo.address;
-    const mymobile = mobile || userInfo.mobile;
-    const mydob = dob || menteeInfo.dob;
-    const myoccupation = occupation || menteeInfo.occupation;
-    // const mytoken = token || menteeInfo.fcm_token;
-    const mytoken = null;
-    // console.log(menteeInfo);
-    const profile_img =
-      formattedFileUrls.profile_img?.[0]?.downloadURL || userInfo.profile_img;
-    if (formattedFileUrls.profile_img && userInfo.profile_img) {
-      await deleteFileFromStorage(userInfo.profile_img);
+    // Step 2: Use defaults for empty inputs
+    const updatedName = name || userInfo.name;
+    const updatedGender = gender || userInfo.gender;
+    const updatedAddress = address || userInfo.address;
+    const updatedMobile = mobile || userInfo.mobile;
+    const updatedDob = dob || menteeInfo.dob;
+    const updatedOccupation = occupation || menteeInfo.occupation;
+    const updatedToken = token || menteeInfo.fcm_token;
+
+    let profile_img = userInfo.profile_img;
+
+    // Handle profile image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN || 'http://localhost:8000';
+      profile_img = `${domain}/uploads/user/${req.file.filename}`;
     }
-    // Update the user's basic information (excluding email)
+
+    // Step 3: Update user information
     const updateUserQuery = `
       UPDATE users
       SET name = $1, gender = $2, address = $3, mobile = $4, profile_img = $5
       WHERE user_id = $6
-      RETURNING *; -- Return all columns of the updated user
+      RETURNING user_id, name, gender, address, mobile, profile_img;
     `;
     const updateUserValues = [
-      myname,
-      mygender,
-      myaddress,
-      mymobile,
+      updatedName,
+      updatedGender,
+      updatedAddress,
+      updatedMobile,
       profile_img,
       user_id,
     ];
     const updatedUserResult = await db.query(updateUserQuery, updateUserValues);
-    const updatedUser = updatedUserResult.rows[0]; // Fetch the updated user details
 
-    // Update the mentee-specific information
+    // Step 4: Update mentee-specific information
     const updateMenteeQuery = `
       UPDATE mentees
-      SET occupation = $1 , dob = $2, fcm_token = $3
-      WHERE user_id = $4;
+      SET dob = $1, occupation = $2, fcm_token = $3
+      WHERE user_id = $4
+      RETURNING user_id, dob, occupation, fcm_token;
     `;
-    const updateMenteeValues = [myoccupation, mydob, mytoken, user_id];
-    await db.query(updateMenteeQuery, updateMenteeValues);
+    const updateMenteeValues = [updatedDob, updatedOccupation, updatedToken, user_id];
+    const updatedMenteeResult = await db.query(updateMenteeQuery, updateMenteeValues);
 
-    if (!updatedUser) {
+    if (updatedUserResult.rows.length === 0 || updatedMenteeResult.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: "Update failed",
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Mentee profile updated successfully",
-      // user: updatedUser, // Return the updated user details
+      user: updatedUserResult.rows[0],
+      mentee: updatedMenteeResult.rows[0],
     });
   } catch (error) {
-    console.error(error.message);
+    console.error("Error updating mentee profile:", error);
     return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the mentee profile",
       error: error.message,
     });
   }
 };
 
+
+
 // Update Mentor Profile
-exports.updateMentorProfile = async (req, res, formattedFileUrls) => {
+exports.updateMentorProfile = async (req, res) => {
   const { user_id } = req.params;
-  const {
-    name,
-    gender,
-    address,
-    mobile,
-    experience,
-    degree,
-    medical_lic_num,
-  } = req.body;
+  const { name, gender, address, mobile, experience, degree, medical_lic_num } = req.body;
 
   try {
-    const dbQueries = [];
+    // Fetch existing user and mentor data
+    const userInfoQuery = `SELECT name, gender, address, mobile, profile_img FROM users WHERE user_id = $1;`;
+    const mentorInfoQuery = `SELECT experience, degree, medical_lic_num, pancard_img, adharcard_front_img, adharcard_back_img, doctor_reg_cert_img FROM mentors WHERE user_id = $1;`;
 
-    // Fetch all mentor-specific information from the database
-    const userInfoQuery = `
-      SELECT name, gender, address, mobile, profile_img
-      FROM users
-      WHERE user_id = $1;
-    `;
-    const userInfoResult = await db.query(userInfoQuery, [user_id]);
+    const [userInfoResult, mentorInfoResult] = await Promise.all([
+      db.query(userInfoQuery, [user_id]),
+      db.query(mentorInfoQuery, [user_id]),
+    ]);
+
     const userInfo = userInfoResult.rows[0];
-
-    // Fetch All Mentor's Details
-    const mentorInfoQuery = `
-      SELECT experience, degree, medical_lic_num,pancard_img, adharcard_front_img, adharcard_back_img, doctor_reg_cert_img
-      FROM mentors
-      WHERE user_id = $1;
-    `;
-    const mentorInfoResult = await db.query(mentorInfoQuery, [user_id]);
     const mentorInfo = mentorInfoResult.rows[0];
 
-    const myname = name || userInfo.name;
-    const mygender = gender || userInfo.gender;
-    const myaddress = address || userInfo.address;
-    const mymobile = mobile || userInfo.mobile;
-    const myexperience = experience || mentorInfo.experience;
-    const mydegree = degree || mentorInfo.degree;
-    const mymedical_lic_num = medical_lic_num || mentorInfo.medical_lic_num;
-
-    // Check if formattedFileUrls is empty, if so, use previous values
-    if (!formattedFileUrls) {
-      console.log("Formatted file URLs are empty. Using previous values.");
-      formattedFileUrls = {};
+    if (!userInfo || !mentorInfo) {
+      return res.status(404).json({ success: false, message: 'User or mentor not found' });
     }
 
-    // Check if profile_img is uploaded, if not, use the previous value
-    const profile_img =
-      formattedFileUrls.profile_img?.[0]?.downloadURL || userInfo.profile_img;
-    if (formattedFileUrls.profile_img && userInfo.profile_img) {
-      await deleteFileFromStorage(userInfo.profile_img);
-      // try {
-      // } catch (error) {
-      //   // Handle errors if needed
-      //   console.error("Error deleting previous profile image:", error.message);
-      // }
-    }
+    // Set default values and update file URLs
+    const domain = process.env.DOMAIN || 'http://localhost:8000';
+    const updatedUser = {
+      name: name || userInfo.name,
+      gender: gender || userInfo.gender,
+      address: address || userInfo.address,
+      mobile: mobile || userInfo.mobile,
+      profile_img: req.files?.['profile_img']
+        ? `${domain}/uploads/user/${req.files['profile_img'][0].filename}`
+        : userInfo.profile_img,
+    };
 
-    const pancard_img =
-      formattedFileUrls.pancard_img?.[0]?.downloadURL || mentorInfo.pancard_img;
-    if (formattedFileUrls.pancard_img && mentorInfo.pancard_img) {
-      await deleteFileFromStorage(mentorInfo.pancard_img);
-      // try {
-      //   await deleteFileFromStorage(mentorInfo.pancard_img);
-      // } catch (error) {
-      //   // Handle errors if needed
-      //   console.error("Error deleting previous pancard image:", error.message);
-      // }
-    }
+    const updatedMentor = {
+      experience: experience || mentorInfo.experience,
+      degree: degree || mentorInfo.degree,
+      medical_lic_num: medical_lic_num || mentorInfo.medical_lic_num,
+      pancard_img: req.files?.['pancard_img']
+        ? `${domain}/uploads/user/${req.files['pancard_img'][0].filename}`
+        : mentorInfo.pancard_img,
+      adharcard_front_img: req.files?.['adharcard_front_img']
+        ? `${domain}/uploads/user/${req.files['adharcard_front_img'][0].filename}`
+        : mentorInfo.adharcard_front_img,
+      adharcard_back_img: req.files?.['adharcard_back_img']
+        ? `${domain}/uploads/user/${req.files['adharcard_back_img'][0].filename}`
+        : mentorInfo.adharcard_back_img,
+      doctor_reg_cert_img: req.files?.['doctor_reg_cert_img']
+        ? `${domain}/uploads/user/${req.files['doctor_reg_cert_img'][0].filename}`
+        : mentorInfo.doctor_reg_cert_img,
+    };
 
-    const adharcard_front_img =
-      formattedFileUrls.adharcard_front_img?.[0]?.downloadURL ||
-      mentorInfo.adharcard_front_img;
-    if (
-      formattedFileUrls.adharcard_front_img &&
-      mentorInfo.adharcard_front_img
-    ) {
-      await deleteFileFromStorage(mentorInfo.adharcard_front_img);
-      // try {
-      //   await deleteFileFromStorage(mentorInfo.adharcard_front_img);
-      // } catch (error) {
-      //   // Handle errors if needed
-      //   console.error(
-      //     "Error deleting previous adharcard front image:",
-      //     error.message
-      //   );
-      // }
-    }
-
-    const adharcard_back_img =
-      formattedFileUrls.adharcard_back_img?.[0]?.downloadURL ||
-      mentorInfo.adharcard_back_img;
-    if (formattedFileUrls.adharcard_back_img && mentorInfo.adharcard_back_img) {
-      await deleteFileFromStorage(mentorInfo.adharcard_back_img);
-      // try {
-      // } catch (error) {
-      //   // Handle errors if needed
-      //   console.error(
-      //     "Error deleting previous adharcard back image:",
-      //     error.message
-      //   );
-      // }
-    }
-
-    const doctor_reg_cert_img =
-      formattedFileUrls.doctor_reg_cert_img?.[0]?.downloadURL ||
-      mentorInfo.doctor_reg_cert_img;
-    if (
-      formattedFileUrls.doctor_reg_cert_img &&
-      mentorInfo.doctor_reg_cert_img
-    ) {
-      await deleteFileFromStorage(mentorInfo.doctor_reg_cert_img);
-      // try {
-      // } catch (error) {
-      //   // Handle errors if needed
-      //   console.error(
-      //     "Error deleting previous doctor reg cert image:",
-      //     error.message
-      //   );
-      // }
-    }
-
-    // Update the user's basic information
+    // Update user information
     const updateUserQuery = `
       UPDATE users
       SET name = $1, gender = $2, address = $3, mobile = $4, profile_img = $5
-      WHERE user_id = $6
-      RETURNING *;
+      WHERE user_id = $6;
     `;
-    const updateUserValues = [
-      myname,
-      mygender,
-      myaddress,
-      mymobile,
-      profile_img,
+    await db.query(updateUserQuery, [
+      updatedUser.name,
+      updatedUser.gender,
+      updatedUser.address,
+      updatedUser.mobile,
+      updatedUser.profile_img,
       user_id,
-    ];
-    dbQueries.push(db.query(updateUserQuery, updateUserValues));
+    ]);
 
-    // Update the mentor-specific information
+    // Update mentor-specific information
     const updateMentorQuery = `
       UPDATE mentors
       SET experience = $1, degree = $2, medical_lic_num = $3, pancard_img = $4, adharcard_front_img = $5, adharcard_back_img = $6, doctor_reg_cert_img = $7
       WHERE user_id = $8;
     `;
-    const updateMentorValues = [
-      myexperience,
-      mydegree,
-      mymedical_lic_num,
-      pancard_img,
-      adharcard_front_img,
-      adharcard_back_img,
-      doctor_reg_cert_img,
+    await db.query(updateMentorQuery, [
+      updatedMentor.experience,
+      updatedMentor.degree,
+      updatedMentor.medical_lic_num,
+      updatedMentor.pancard_img,
+      updatedMentor.adharcard_front_img,
+      updatedMentor.adharcard_back_img,
+      updatedMentor.doctor_reg_cert_img,
       user_id,
-    ];
-    dbQueries.push(db.query(updateMentorQuery, updateMentorValues));
+    ]);
 
-    // Execute all queries in parallel
-    const results = await Promise.all(dbQueries);
-
-    const updatedUser = results[0].rows[0]; // Fetch the updated user details
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
+    // Respond with success
     return res.status(200).json({
       success: true,
-      message: "Mentor profile updated successfully",
-      // user: updatedUser, // Return the updated user details
+      message: 'Mentor profile updated successfully',
+      updatedUser,
+      updatedMentor,
     });
   } catch (error) {
-    console.error(error.message);
+    console.error('Error updating mentor profile:', error);
     return res.status(500).json({
-      error: error.message,
+      success: false,
+      message: 'An error occurred while updating the mentor profile.',
     });
   }
 };

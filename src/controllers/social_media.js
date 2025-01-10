@@ -1,7 +1,9 @@
 const db = require("../../db.js");
+const fs = require("fs");
+const path = require("path");
 
 // Create a new social media entry
-exports.createSocialMedia = async (req, res, formattedFileUrls) => {
+exports.createSocialMedia = async (req, res) => {
   const { title, description, links } = req.body;
 
   try {
@@ -10,7 +12,14 @@ exports.createSocialMedia = async (req, res, formattedFileUrls) => {
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
+
+    let cover_img = null;
+
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/media/${req.file.filename}`;
+    }
 
     const { rows } = await db.query(query, [
       title,
@@ -92,7 +101,7 @@ exports.getSocialMediaById = async (req, res) => {
 };
 
 // Update a specific social media entry by ID
-exports.updateSocialMediaById = async (req, res, formattedFileUrls) => {
+exports.updateSocialMediaById = async (req, res) => {
   const socialMediaId = req.params.id;
   const { title, description, links } = req.body;
 
@@ -103,7 +112,14 @@ exports.updateSocialMediaById = async (req, res, formattedFileUrls) => {
       WHERE id = $5
       RETURNING *;
     `;
-    const cover_img = formattedFileUrls.cover_img[0].downloadURL;
+
+    let cover_img = null;
+
+    // Handle single cover image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN; // Ensure you have a DOMAIN in your environment variables
+      cover_img = `${domain}/uploads/media/${req.file.filename}`;
+    }
 
     const { rows } = await db.query(query, [
       title,
@@ -133,6 +149,7 @@ exports.updateSocialMediaById = async (req, res, formattedFileUrls) => {
 };
 
 // Delete a specific social media entry by ID
+
 exports.deleteSocialMediaById = async (req, res) => {
   const socialMediaId = req.params.id;
 
@@ -147,9 +164,28 @@ exports.deleteSocialMediaById = async (req, res) => {
     }
 
     const deletedSocialMedia = rows[0];
+    const coverImgUrl = deletedSocialMedia.cover_img; // Adjust to match your DB column name for the image URL
+
+    // Remove the associated cover image file from the server
+    if (coverImgUrl) {
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/media", // Adjust based on your upload folder structure
+        path.basename(coverImgUrl)
+      );
+
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting cover image file:", err.message);
+        } else {
+          console.log("Cover image file deleted successfully");
+        }
+      });
+    }
+
     return res.status(200).json({
       success: true,
-      is_deleted: "successfully Deleted !",
+      is_deleted: "Successfully Deleted!",
       data: deletedSocialMedia,
     });
   } catch (error) {

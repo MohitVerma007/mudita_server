@@ -1,16 +1,9 @@
 const db = require("../../db.js");
-
-// ****** Firebase Setup Start  ******
-
-const admin = require("firebase-admin");
-const { firebaseConfig } = require("../config/firebase_config");
-const { getStorage, ref, deleteObject } = require("firebase/storage");
-const storage = getStorage();
-
-// **** Firebase Setup End ******
+const fs = require("fs");
+const path = require("path");
 
 // Create a new Insta post
-exports.createInsta = async (req, res, formattedFileUrls) => {
+exports.createInsta = async (req, res) => {
   const { title, video } = req.body;
 
   try {
@@ -20,7 +13,14 @@ exports.createInsta = async (req, res, formattedFileUrls) => {
       RETURNING *;
     `;
 
-    const img = formattedFileUrls.img[0].downloadURL;
+    let img = null;
+
+    // Handle single image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN;
+      img = `${domain}/uploads/insta/${req.file.filename}`;
+    }
+
     const { rows } = await db.query(query, [title, img, video]);
 
     const createdInsta = rows[0];
@@ -107,7 +107,13 @@ exports.updateInstaById = async (req, res, formattedFileUrls) => {
       WHERE id = $4
       RETURNING *;
     `;
-    const img = formattedFileUrls.img[0].downloadURL;
+    let img = null;
+
+    // Handle single image upload
+    if (req.file) {
+      const domain = process.env.DOMAIN;
+      img = `${domain}/uploads/insta/${req.file.filename}`;
+    }
 
     const { rows } = await db.query(query, [title, img, video, InstaId]);
 
@@ -131,6 +137,7 @@ exports.updateInstaById = async (req, res, formattedFileUrls) => {
 };
 
 // Delete Insta post by ID
+
 exports.deleteInstaById = async (req, res) => {
   const InstaId = req.params.id;
 
@@ -140,34 +147,32 @@ exports.deleteInstaById = async (req, res) => {
 
     if (rows.length === 0) {
       return res.status(404).json({
-        error: "Insta post not found",
+        error: "Insta not found",
       });
     }
 
     const deletedInsta = rows[0];
-    console.log(rows[0].img);
+    const imgUrl = deletedInsta.img; // Adjust to match your DB column name for the image URL
 
-    const previewUrl = rows[0].img;
-    // Extract the file name from the preview URL
-    const fileNameWithEncoding = previewUrl.split("/").pop().split("?")[0];
-    const fileUrl = decodeURIComponent(fileNameWithEncoding);
+    if (imgUrl) {
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/insta", // Adjust based on your upload folder structure
+        path.basename(imgUrl)
+      );
 
-    const desertRef = ref(storage, `${fileUrl}`);
-
-    // Delete the file
-    deleteObject(desertRef)
-      .then(() => {
-        // File deleted successfully
-        console.log("Deleted file from bucket");
-      })
-      .catch((error) => {
-        // Uh-oh, an error occurred!
-        console.error(error.message);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting  image file:", err.message);
+        } else {
+          console.log("Insta image file deleted successfully");
+        }
       });
+    }
 
     return res.status(200).json({
       success: true,
-      is_deleted: "successfully Deleted !",
+      is_deleted: "Successfully Deleted!",
       data: deletedInsta,
     });
   } catch (error) {
@@ -177,7 +182,6 @@ exports.deleteInstaById = async (req, res) => {
     });
   }
 };
-
 
 
 // Lik Insta post by User ID
